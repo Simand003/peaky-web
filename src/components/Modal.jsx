@@ -2,7 +2,7 @@
 // title: text shown at the top of the card
 // onClose: called when the user clicks outside the card or on the X button
 // children: whatever is placed between <Modal> and </Modal>
-export default function Modal({ title, onClose, closeOnBackDrop = true, children }) {
+export default function Modal({ title, onClose, closeOnBackDrop = true, width = 520, children }) {
   return (
     // Backdrop: covers the whole window, above the map (Leaflet uses z-index up to 1000)
     <div
@@ -24,7 +24,7 @@ export default function Modal({ title, onClose, closeOnBackDrop = true, children
           backgroundColor: "var(--md-theme-background)",
           borderRadius: 16,
           padding: 32,
-          width: 520,
+          width: width,
           maxWidth: "90%", // on small windows, never wider than 90%
           maxHeight: "90%", // on short windows, never taller than 90%
           overflowY: "auto", // scroll inside the card if the content is too tall

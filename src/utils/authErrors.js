@@ -17,6 +17,13 @@ export function getAuthErrorMessage(error) {
       return "This email is already registered with another sign-in method. Please log in instead.";
     case "auth/popup-blocked":
       return "Your browser blocked the Google window. Allow pop-ups for this site and try again.";
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return "Incorrect email or password. If you registered with Google, use the Google button.";
+    case "auth/user-disabled":
+      return "This account has been disabled.";
+    case "app/email-used-with-other-method":
+      return "This email is registered with email and password. Please log in with your password.";
     default:
       return "Something went wrong. Please try again.";
   }

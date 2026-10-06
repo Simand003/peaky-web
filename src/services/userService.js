@@ -1,4 +1,4 @@
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 // Saves the user's profile in the "users" collection of Firestore.
@@ -13,4 +13,9 @@ export async function saveUserProfile(user, { name, surname, gender, birthDate})
         gender,
         birth_date: birthDate,
     });
+}
+
+export async function userProfileExists(uid) {
+    const snapshot = await getDoc(doc(db, "users", uid));
+    return snapshot.exists();
 }

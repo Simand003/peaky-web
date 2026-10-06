@@ -1,16 +1,20 @@
-import ProfileButton from "./ProfileButton"
+import ProfileMenu from "./ProfileMenu";
 
 // Top bar of the site: app name on the left, login button on the right
-export default function TopBar({ user, onSignUpClick }) {
+export default function TopBar({ user, onSignUpClick, onLoginClick }) {
   return (
     <header
       style={{
         display: "flex", // place the children in a row
         justifyContent: "space-between", // first child to the left, last child to the right
         alignItems: "center", // center the children vertically
-        height: 64, // bar height in pixels
+
+        height: "var(--topbar-height)",
+        minHeight: "var(--topbar-height)",
+        flexShrink: 0,
+
         padding: "0 80px", // 16px of space on the left and right sides
-        backgroundColor: "white", // dark green background
+        backgroundColor: "var(--md-theme-background)", // dark green background
         color: "var(--md-theme-primary)", // text color
       }}
     >
@@ -19,7 +23,7 @@ export default function TopBar({ user, onSignUpClick }) {
 
       {/* Right side: round button if logged in, otherwise Login and Sign up */}
       {user ? (
-        <ProfileButton />
+        <ProfileMenu />
       ) : (
         <div
           style={{
@@ -31,11 +35,7 @@ export default function TopBar({ user, onSignUpClick }) {
 
           {/* Login button, on the right (does nothing yet) */}
           <button
-            onClick={() => {
-              // Debug: show what the button received
-              console.log("Sign up clicked, onSignUpClick =", onSignUpClick);
-              onSignUpClick();
-            }}
+            onClick={() => { onSignUpClick(); }}
             style={{
 
               backgroundColor: "white",
@@ -49,7 +49,7 @@ export default function TopBar({ user, onSignUpClick }) {
           >Sign up for free</button>
 
           <button
-            onClick={() => alert("Login coming soon")}
+            onClick={onLoginClick}
             style={{
               backgroundColor: "var(--md-theme-primary)",
               color: "white",

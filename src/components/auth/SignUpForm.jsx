@@ -8,12 +8,13 @@ import {
     validateConfirmPassword,
 } from "../../utils/validation";
 import { registerWithEmail, registerWithGoogle } from "../../services/authService";
-import { getAuthErrorMessage } from "../../services/authErrors";
+import { getAuthErrorMessage } from "../../utils/authErrors";
 import GoogleLogo from "../icons/GoogleLogo";
+import LinkButton from "../LinkButton";
 
 // First sign-up screen: email and password, or Google.
 // onSuccess: called with the new Firebase user once the account is created.
-export default function SignUpForm({ onSuccess }) {
+export default function SignUpForm({ onSuccess, onSwitchToLogin }) {
     // One state variable per field: always holds what the user has typed
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -154,6 +155,10 @@ export default function SignUpForm({ onSuccess }) {
                 <GoogleLogo />
                 Continue with Google
             </button>
+
+            <span style={{ fontSize: 14, textAlign: "center" }}>
+                Already have an account? <LinkButton onClick={onSwitchToLogin}>Log in</LinkButton>
+            </span>
         </div>
     );
 }

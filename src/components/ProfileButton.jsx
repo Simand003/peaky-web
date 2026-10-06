@@ -1,21 +1,49 @@
-import { logout } from "../services/authService"
-
-// Round button shown in the top bar when a user is logged in.
-// For now it is empty; later it can show the profile picture.
-export default function ProfileButton() {
+// Round button of the profile area. For now it is empty;
+// later it can show the profile picture.
+// onClick: what to do when it is pressed (decided by the parent).
+export default function ProfileButton({ onClick, isOpen }) {
   return (
     <button
-      onClick={logout}
-      title="Log out (temporary)"
-      aria-label="Profile" // text read by screen readers, since the button shows no text
+      onClick={onClick}
+      aria-label="Open profile menu"
       style={{
-        width: 40, // same width and height...
         height: 40,
-        borderRadius: "50%", // ...plus a 50% radius makes a perfect circle
-        border: "none", // remove the default button border
-        backgroundColor: "var(--md-theme-primary-container)", // color from colors.css
-        cursor: "pointer", // show the hand cursor on hover
+        minWidth: 64,
+        padding: "0 10px 0 4px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 8,
+
+        border: "none",
+        borderRadius: 20,
+        backgroundColor: "var(--md-theme-primary-container)",
+        cursor: "pointer",
       }}
-    />
+    >
+      {/* Profile circle */}
+      <div
+        style={{
+          width: 32,
+          height: 32,
+          flexShrink: 0,
+          borderRadius: "50%",
+          backgroundColor: "var(--md-theme-on-primary)",
+        }}
+      />
+
+      {/* Arrow */}
+      <span
+        style={{
+          width: 8,
+          height: 8,
+          borderLeft: "2px solid var(--md-theme-on-primary-container)",
+          borderBottom: "2px solid var(--md-theme-on-primary-container)",
+          transform: isOpen ? "rotate(135deg)" : "rotate(-45deg)",
+          transition: "transform 150ms ease",
+          marginTop: isOpen ? 4 : -4,
+        }}
+      />
+    </button>
   );
 }

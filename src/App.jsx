@@ -4,6 +4,7 @@ import TopBar from "./components/TopBar";
 import AuthModal from "./components/auth/AuthModal";
 import { useState } from "react"
 import useAuth from "./hooks/useAuth";
+import { auth } from "./services/firebase";
 
 const GRIGNETTA_CENTER = [45.92, 9.39];
 
@@ -11,7 +12,7 @@ export default function App() {
 
   const user = useAuth();
   // Later this value will come from Firebase.
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [authMode, setAuthMode] = useState(null);
 
   return (
     // Wrapper: the overlay below is positioned relative to this box
@@ -24,7 +25,11 @@ export default function App() {
         overflow: "hidden", // clip anything that sticks out of the wrapper
       }}
     >
-      <TopBar user={user} onSignUpClick={() => setIsSignUpOpen(true)} />
+      <TopBar 
+      user={user} 
+      onSignUpClick={() => setAuthMode("signup")} 
+      onLoginClick={() => setAuthMode("login")}
+      />
 
       <MapContainer
         center={GRIGNETTA_CENTER}
@@ -38,9 +43,7 @@ export default function App() {
         />
       </MapContainer>
 
-      {isSignUpOpen && (
-        <AuthModal onClose={() => setIsSignUpOpen(false)} />
-      )}
+      {authMode && <AuthModal initialMode={authMode} onClose={() => setAuthMode(null)}/>}
     </div>
   );
 }
