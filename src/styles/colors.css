@@ -1,0 +1,54 @@
+/* Colors converted from the Android file colors.xml */
+/* Material 3 theme, standard contrast (medium and high contrast not included) */
+/* Usage in CSS:  color: var(--md-theme-primary);  */
+:root {
+  --md-theme-primary: #784515;
+  --md-theme-on-primary: #FFFFFF;
+  --md-theme-primary-container: #955C2B;
+  --md-theme-on-primary-container: #FFE6D5;
+  --md-theme-secondary: #765842;
+  --md-theme-on-secondary: #FFFFFF;
+  --md-theme-secondary-container: #FED5B8;
+  --md-theme-on-secondary-container: #795B44;
+  --md-theme-tertiary: #535410;
+  --md-theme-on-tertiary: #FFFFFF;
+  --md-theme-tertiary-container: #6B6D27;
+  --md-theme-on-tertiary-container: #EEEF9A;
+  --md-theme-error: #BA1A1A;
+  --md-theme-on-error: #FFFFFF;
+  --md-theme-error-container: #FFDAD6;
+  --md-theme-on-error-container: #93000A;
+  --md-theme-background: #FFF8F5;
+  --md-theme-on-background: #201A16;
+  --md-theme-surface: #FFF8F5;
+  --md-theme-on-surface: #201A16;
+  --md-theme-surface-variant: #F4DFD1;
+  --md-theme-on-surface-variant: #52443A;
+  --md-theme-outline: #847469;
+  --md-theme-outline-variant: #D7C3B6;
+  --md-theme-scrim: #000000;
+  --md-theme-inverse-surface: #362F2B;
+  --md-theme-inverse-on-surface: #FBEEE7;
+  --md-theme-inverse-primary: #FFB77F;
+  --md-theme-primary-fixed: #FFDCC3;
+  --md-theme-on-primary-fixed: #2F1500;
+  --md-theme-primary-fixed-dim: #FFB77F;
+  --md-theme-on-primary-fixed-variant: #6B3A0B;
+  --md-theme-secondary-fixed: #FFDCC3;
+  --md-theme-on-secondary-fixed: #2B1705;
+  --md-theme-secondary-fixed-dim: #E6BFA3;
+  --md-theme-on-secondary-fixed-variant: #5C412C;
+  --md-theme-tertiary-fixed: #E6E793;
+  --md-theme-on-tertiary-fixed: #1C1D00;
+  --md-theme-tertiary-fixed-dim: #C9CB7A;
+  --md-theme-on-tertiary-fixed-variant: #484A04;
+  --md-theme-surface-dim: #E4D8D1;
+  --md-theme-surface-bright: #FFF8F5;
+  --md-theme-surface-container-lowest: #FFFFFF;
+  --md-theme-surface-container-low: #FEF1EA;
+  --md-theme-surface-container: #F8EBE4;
+  --md-theme-surface-container-high: #F2E6DF;
+  --md-theme-surface-container-highest: #EDE0D9;
+  --red: #FF0000;
+  --green: #008000;
+}
