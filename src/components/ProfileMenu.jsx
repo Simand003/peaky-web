@@ -3,6 +3,7 @@ import ProfileButton from "./ProfileButton";
 import MenuItem from "./MenuItem";
 import ConfirmDialog from "./ConfirmDialog";
 import { logout } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 import { Settings, LogOut, MountainSnow, Heart } from "lucide-react";
 
 // Profile area of the top bar: the round button, the dropdown menu under it,
@@ -10,6 +11,7 @@ import { Settings, LogOut, MountainSnow, Heart } from "lucide-react";
 export default function ProfileMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const navigate = useNavigate();
 
   // "Log out" row pressed: hide the menu and ask for confirmation
   function handleLogoutClick() {
@@ -25,6 +27,12 @@ export default function ProfileMenu() {
       console.error("Logout failed:", error);
     }
     setIsConfirmOpen(false);
+  }
+
+  // "My peaks" row pressed: close the menu and open the diary page
+  function handleMyPeaksClick() {
+    setIsMenuOpen(false);
+    navigate("/my-peaks");
   }
 
   return (
@@ -65,7 +73,7 @@ export default function ProfileMenu() {
             }}
           >
             <MenuItem label="Favourites" icon={Heart} onClick={() => { }} />
-            <MenuItem label="My peaks" icon={MountainSnow} onClick={() => {}} />
+            <MenuItem label="My peaks" icon={MountainSnow} onClick={handleMyPeaksClick} />
             <MenuItem label="Settings" icon={Settings} onClick={() => { }} />
             <MenuItem label="Log out" icon={LogOut} onClick={handleLogoutClick} />
           </div>

@@ -3,8 +3,10 @@ import Modal from "../Modal";
 import DateField from "../DateField";
 import TimeField from "../TimeField";
 import FormField from "../FormField";
-import { addClimb } from "../../services/climbsService";
-import { combineDateAndTime } from "../../utils/date";
+import PeakPicker from "./PeakPicker";
+import { addClimb, updateClimb } from "../../services/climbsService";
+import { combineDateAndTime, formatTime } from "../../utils/date";
+import { toClimbPeak } from "../../utils/climbs";
 
 // Shared look of the two buttons at the bottom
 const buttonStyle = {
@@ -14,10 +16,29 @@ const buttonStyle = {
   cursor: "pointer",
 };
 
-export default function AddClimbModal({ peak, user, onClose }) {
-  const [date, setDate] = useState(undefined); // a Date, or undefined
-  const [time, setTime] = useState(""); // "HH:mm" or "" (optional)
-  const [report, setReport] = useState("");
+// Add mode: pass `user`, `allPeaks` and optionally `initialPeak`.
+// Edit mode: pass the `climb` to change and `allPeaks`.
+// onSaved (optional): called after a successful save, e.g. to reload the diary.
+export default function ClimbFormModal({
+  user,
+  climb,
+  initialPeak,
+  allPeaks,
+  onClose,
+  onSaved,
+}) {
+  const isEditing = Boolean(climb);
+
+  // In edit mode the form starts with the saved values
+  const savedDate = climb ? climb.climbedAt.toDate() : undefined;
+
+  const [peaks, setPeaks] = useState(
+    climb ? climb.peaks : initialPeak ? [toClimbPeak(initialPeak)] : []
+  );
+  const [date, setDate] = useState(savedDate); // a Date, or undefined
+  const [time, setTime] = useState(climb?.hasTime ? formatTime(savedDate) : "");
+  const [notes, setNotes] = useState(climb?.notes ?? "");
+  const [peaksError, setPeaksError] = useState("");
   const [dateError, setDateError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -25,36 +46,45 @@ export default function AddClimbModal({ peak, user, onClose }) {
 
   async function handleSave() {
     setSaveError("");
+    let hasErrors = false;
 
-    if (!date) {
-      setDateError("Choose the date of the climb");
-      return;
+    if (peaks.length === 0) {
+      setPeaksError("Add at least one peak");
+      hasErrors = true;
+    } else {
+      setPeaksError("");
     }
 
     // Merge day + optional time into the values stored in Firestore
-    const { climbedAt, hasTime } = combineDateAndTime(date, time);
+    const { climbedAt, hasTime } = date ? combineDateAndTime(date, time) : {};
 
-    // Today with a later time of day would still be in the future
-    if (climbedAt > new Date()) {
+    if (!date) {
+      setDateError("Choose the date of the climb");
+      hasErrors = true;
+    } else if (climbedAt > new Date()) {
+      // Today with a later time of day would still be in the future
       setDateError("The climb cannot be in the future");
-      return;
+      hasErrors = true;
+    } else {
+      setDateError("");
     }
-    setDateError("");
+
+    if (hasErrors) return;
 
     setIsSaving(true);
     try {
-      await addClimb({
-        userId: user.uid,
-        peak,
-        climbedAt,
-        hasTime,
-        report: report.trim(),
-      });
+      const data = { peaks, climbedAt, hasTime, notes: notes.trim() };
+      if (isEditing) {
+        await updateClimb(climb.id, data);
+      } else {
+        await addClimb({ userId: user.uid, ...data });
+      }
       setIsSaved(true);
+      // "?.()" calls the function only if the parent passed it
+      onSaved?.();
     } catch (e) {
       setSaveError(e.message);
     } finally {
-      // Runs both after success and after an error
       setIsSaving(false);
     }
   }
@@ -62,9 +92,11 @@ export default function AddClimbModal({ peak, user, onClose }) {
   // Confirmation screen shown after a successful save
   if (isSaved) {
     return (
-      <Modal title="Climb saved" onClose={onClose} width={420}>
+      <Modal title={isEditing ? "Changes saved" : "Climb saved"} onClose={onClose} width={420}>
         <p style={{ marginTop: 0 }}>
-          Your climb of <strong>{peak.name}</strong> is now in your diary.
+          {isEditing
+            ? "Your climb has been updated."
+            : "Your climb is now in your diary."}
         </p>
         <button
           onClick={onClose}
@@ -82,11 +114,15 @@ export default function AddClimbModal({ peak, user, onClose }) {
   }
 
   return (
-    <Modal title="Add climb" onClose={onClose} width={440}>
+    <Modal title={isEditing ? "Edit climb" : "Add climb"} onClose={onClose} width={440}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <p style={{ margin: 0, color: "var(--md-theme-on-surface-variant)" }}>
-          {peak.name} · {peak.elevation} m
-        </p>
+        <PeakPicker
+          label="Peaks*"
+          allPeaks={allPeaks}
+          selected={peaks}
+          onChange={setPeaks}
+          error={peaksError}
+        />
 
         <DateField
           label="Date of the climb*"
@@ -104,10 +140,10 @@ export default function AddClimbModal({ peak, user, onClose }) {
         <FormField
           as="textarea"
           rows={4}
-          label="Report (optional, private)"
-          placeholder="How did it go?"
-          value={report}
-          onChange={(e) => setReport(e.target.value)}
+          label="Notes (optional, private)"
+          placeholder="Anything you want to remember about this climb"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
         />
 
         {saveError && (

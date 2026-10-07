@@ -1,7 +1,9 @@
 import ProfileMenu from "./ProfileMenu";
+import "../styles/topBar.css";
+import { Link } from "react-router-dom";
 
 // Top bar of the site: app name on the left, login button on the right
-export default function TopBar({ user, onSignUpClick, onLoginClick }) {
+export default function TopBar({ user, onSignUpClick, onLoginClick, authLoading }) {
   return (
     <header
       style={{
@@ -13,16 +15,17 @@ export default function TopBar({ user, onSignUpClick, onLoginClick }) {
         minHeight: "var(--topbar-height)",
         flexShrink: 0,
 
-        padding: "0 80px", // 16px of space on the left and right sides
+        padding: "0 32px", // 32px from the left and right edges, on every screen size
         backgroundColor: "var(--md-theme-background)", // dark green background
         color: "var(--md-theme-primary)", // text color
       }}
     >
-      {/* App name, on the left */}
-      <span style={{ fontSize: 30, fontWeight: "bold" }}>PEAKY</span>
+
+      {/* App name, on the left: clicking it goes back to the map */}
+      <Link to="/" className="topbar__brand"> PEAKY </Link>
 
       {/* Right side: round button if logged in, otherwise Login and Sign up */}
-      {user ? (
+      {authLoading ? null : user ? (
         <ProfileMenu />
       ) : (
         <div
@@ -35,6 +38,7 @@ export default function TopBar({ user, onSignUpClick, onLoginClick }) {
 
           {/* Login button, on the right (does nothing yet) */}
           <button
+          className="topbar__button"
             onClick={() => { onSignUpClick(); }}
             style={{
 
@@ -42,21 +46,18 @@ export default function TopBar({ user, onSignUpClick, onLoginClick }) {
               color: "var(--md-theme-primary)",
               border: "1px solid var(--md-theme-primary)",
               borderRadius: "8px",
-              padding: "10px 20px",
-              fontSize: "16px",
               cursor: "pointer",
             }}
           >Sign up for free</button>
 
           <button
+          className="topbar__button"
             onClick={onLoginClick}
             style={{
               backgroundColor: "var(--md-theme-primary)",
               color: "white",
               border: "none",
               borderRadius: "8px",
-              padding: "10px 20px",
-              fontSize: "16px",
               cursor: "pointer",
             }}
           >Login</button>

@@ -4,6 +4,11 @@ export function formatDate(date) {
   return format(date, "dd/MM/yyyy");
 }
 
+// "HH:mm" from a Date (24-hour clock)
+export function formatTime(date) {
+  return format(date, "HH:mm");
+}
+
 // Merges a day (Date) and an optional "HH:mm" string into one Date.
 // With no time, the date stays at 00:00 and hasTime is false,
 // so time-of-day statistics will ignore that climb.

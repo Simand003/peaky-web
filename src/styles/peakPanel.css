@@ -12,8 +12,8 @@
   flex-direction: column;
   overflow: hidden;
   border-radius: 16px;
-  background: var(--md-sys-color-surface, #ffffff);
-  color: var(--md-sys-color-on-surface, #1c1b1f);
+  background: var(--md-theme-background);
+  color: var(--md-theme-on-background);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
@@ -31,7 +31,7 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: var(--md-sys-color-primary-container, #e0e0e0);
+  background: var(--md-theme-secondary-container);
 }
 
 .peak-panel__title {
@@ -96,7 +96,7 @@
 }
 
 .peak-panel__error {
-  color: var(--md-sys-color-error, #b3261e);
+  color: var(--md-theme-error);
 }
 
 /* Two counters side by side */
@@ -113,7 +113,7 @@
   align-items: center;
   padding: 12px;
   border-radius: 12px;
-  background: var(--md-sys-color-surface-variant, #f0f0f0);
+  background: var(--md-theme-secondary-container);
 }
 
 .peak-panel__stats strong {
@@ -149,4 +149,19 @@
   margin-top: 8px;
   font-size: 13px;
   opacity: 0.7;
+}
+
+/* Phones: the panel becomes a sheet that slides up from the bottom */
+@media (max-width: 600px) {
+  .peak-panel {
+    top: auto; /* cancels the "under the search bar" position */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 42vh;
+    /* Only the top corners are rounded */
+    border-radius: 16px 16px 0 0;
+  }
 }

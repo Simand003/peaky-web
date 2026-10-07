@@ -1,0 +1,149 @@
+/* The map page never scrolls, so this page needs its own scroll area */
+/* Fills the space under the top bar and scrolls on its own:
+   the window itself never scrolls (see index.css) */
+.my-peaks {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 16px 32px;
+  background: var(--md-theme-background);
+  color: var(--md-theme-on-surface-variant);
+}
+
+.my-peaks__content {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.my-peaks__content h1 {
+  margin: 16px 0 24px;
+  font-size: 28px;
+  color: var(--md-theme-primary);
+}
+
+.my-peaks__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--md-theme-primary);
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.my-peaks__message {
+  margin: 0;
+}
+
+.my-peaks__message--error {
+  color: var(--md-theme-error);
+}
+
+/* Three summary boxes side by side */
+.my-peaks__stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.my-peaks__stats > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 8px;
+  border-radius: 12px;
+  background: var(--md-theme-secondary-container);
+}
+
+.my-peaks__stats strong {
+  font-size: 22px;
+}
+
+.my-peaks__stats span {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.my-peaks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.climb-card {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--md-theme-outline-variant);
+  border-radius: 12px;
+}
+
+.climb-card__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--md-theme-secondary-container);
+}
+
+.climb-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.climb-card__main h2 {
+  margin: 0 0 2px;
+  font-size: 18px;
+  color: var(--md-theme-primary);
+}
+
+.climb-card__meta {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* The report is cut after 3 lines, so long texts do not stretch the card */
+.climb-card__report {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 10px 0 0;
+  font-size: 15px;
+  white-space: pre-line;
+}
+
+.climb-card__actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.climb-card__action {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.climb-card__action:hover {
+  background: var(--md-theme-secondary-container);
+}
+
+/* Long lists of peak names are cut on one line */
+.climb-card__main h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

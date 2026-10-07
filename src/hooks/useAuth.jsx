@@ -2,22 +2,23 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../services/firebase";
 
-// Custom hook: returns the user currently logged in with Firebase, or null if nobody is.
-// It updates by itself every time someone logs in or out.
+// Custom hook: returns { user, loading }.
+// user: the Firebase user, or null if nobody is logged in.
+// loading: true until Firebase has answered the first time (restoring the saved session).
 export default function useAuth() {
-    const [user, setUser] = useState(null);
+  // One state object, so user and loading always change together
+  const [state, setState] = useState({ user: null, loading: true });
 
-    useEffect(() => {
-        // onAuthStateChanged calls our function once at startup (Firebase restores the
-    // previous session, if any) and again every time the login state changes.
+  useEffect(() => {
+    // Called once at startup (after Firebase checks the saved session)
+    // and again every time someone logs in or out.
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser); // a user object, or null after logout
+      setState({ user: firebaseUser, loading: false });
     });
 
-    // The function we return runs when the component disappears:
-    // it stops listening, so nothing keeps running for nothing.
+    // Runs when the component disappears: stop listening
     return unsubscribe;
-    }, []);
-    
-    return user;
+  }, []);
+
+  return state;
 }

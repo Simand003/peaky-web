@@ -23,7 +23,8 @@ export default function Modal({ title, onClose, closeOnBackDrop = true, width = 
         style={{
           backgroundColor: "var(--md-theme-background)",
           borderRadius: 16,
-          padding: 32,
+          // clamp(min, preferred, max): 5% of the screen width, never below 16px or above 32px
+padding: "clamp(16px, 5vw, 32px)",
           width: width,
           maxWidth: "90%", // on small windows, never wider than 90%
           maxHeight: "90%", // on short windows, never taller than 90%

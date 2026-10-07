@@ -1,0 +1,99 @@
+.peak-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--md-theme-on-surface-variant);
+}
+
+.peak-picker__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.peak-picker__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 12px;
+  border-radius: 999px;
+  background: var(--md-theme-secondary-container);
+  color: var(--md-theme-on-background);
+}
+
+.peak-picker__chip button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.peak-picker__chip button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Same look as FormField: 1px outline, radius 8 */
+.peak-picker__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--md-theme-outline);
+  border-radius: 8px;
+}
+
+.peak-picker__field--error {
+  border-color: var(--md-theme-error);
+}
+
+.peak-picker__field input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+}
+
+.peak-picker__results {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--md-theme-outline-variant);
+  border-radius: 8px;
+}
+
+.peak-picker__results li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.peak-picker__results li:hover {
+  background: var(--md-theme-secondary-container);
+}
+
+.peak-picker__elevation {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.peak-picker__error {
+  color: var(--md-theme-error);
+  font-size: 12px;
+}
+
+.peak-picker__count {
+  font-weight: 600;
+}
