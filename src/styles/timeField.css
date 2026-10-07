@@ -1,0 +1,97 @@
+.time-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.time-field__label {
+  font-size: 14px;
+  color: var(--md-theme-on-surface-variant);
+}
+
+.time-field__control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-field__button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 12px;
+  /* Same look as FormField: 1px outline, radius 8 */
+  border: 1px solid var(--md-theme-outline);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.time-field__placeholder {
+  opacity: 0.5;
+}
+
+.time-field__clear {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.time-field__clear:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Two scrollable columns: hours and minutes */
+.time-field__popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--md-theme-outline-variant);
+  background: var(--md-theme-background);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.time-field__column {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 64px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.time-field__column button {
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.time-field__column button:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.time-field__column button.is-active {
+  background: var(--md-theme-primary);
+  color: var(--md-theme-on-primary, #ffffff);
+}

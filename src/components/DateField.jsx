@@ -10,8 +10,16 @@ import { formatDate } from "../utils/date";
 // value: a Date, or undefined when nothing is chosen.
 // onChange: called with the Date the user picks.
 // error: message shown below. endAdornment: extra element inside the box (e.g. info button).
-export default function DateField({ label, value, onChange, error, endAdornment }) {
-  // true while the calendar is shown
+export default function DateField({
+  label,
+  value,
+  onChange,
+  error,
+  endAdornment,
+  startMonth = new Date(1920, 0),
+  defaultMonth = new Date(2000, 0),
+  captionLayout = "dropdown", }) {
+
   const [isOpen, setIsOpen] = useState(false);
 
   // Called when the user clicks a day in the calendar
@@ -66,10 +74,10 @@ export default function DateField({ label, value, onChange, error, endAdornment 
             mode="single" // only one day can be selected
             selected={value} // the day highlighted in the calendar
             onSelect={handleSelect}
-            captionLayout="dropdown" // month and year menus: a birth year is quick to reach
-            startMonth={new Date(1920, 0)} // earliest month offered (January 1920)
+            captionLayout={captionLayout}
+            startMonth={startMonth}
+            defaultMonth={value ?? defaultMonth}
             endMonth={new Date()} // latest month offered: the current one
-            defaultMonth={value ?? new Date(2000, 0)} // month shown on opening
             disabled={{ after: new Date() }} // days in the future cannot be selected
             // Library colors, replaced with our brown palette from colors.css
             style={{

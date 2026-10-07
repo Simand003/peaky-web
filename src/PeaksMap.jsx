@@ -9,6 +9,7 @@ export default function PeaksMap() {
   const [error, setError] = useState(null);
 
   // Al primo render legge tutta la collezione "peaks"
+  /*
   useEffect(() => {
     getDocs(collection(db, "peaks"))
       .then((snap) =>
@@ -16,6 +17,7 @@ export default function PeaksMap() {
       )
       .catch((e) => setError(e.message));
   }, []);
+  */
 
   return (
     <>

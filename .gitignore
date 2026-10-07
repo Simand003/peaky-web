@@ -33,3 +33,10 @@ dist-ssr
 # Private Firebase admin keys (never share these!)
 serviceAccountKey*.json
 *-adminsdk-*.json
+
+# Firebase admin key: full access to the database, never commit it
+scripts/serviceAccountKey.json
+
+# Python leftovers
+__pycache__/
+.venv/
