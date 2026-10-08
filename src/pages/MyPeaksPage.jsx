@@ -91,7 +91,13 @@ export default function MyPeaksPage({ user, authLoading }) {
                   key={climb.id}
                   climb={climb}
                   // peakIds has no duplicates: one id per different peak
-                  onShowOnMap={() => navigate(`/?peaks=${climb.peakIds.join(",")}`)}
+                  onShowOnMap={() => {
+                    // peakIds has no duplicates: one id per different peak
+                    const params = new URLSearchParams({ peaks: climb.peakIds.join(",") });
+                    // Only climbs with a GPX can have a track to draw
+                    if (climb.gpx) params.set("track", climb.id);
+                    navigate(`/?${params}`);
+                  }}
                   onEdit={() => setClimbToEdit(climb)}
                   onDelete={() => setClimbToDelete(climb)}
                 />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Modal from "../Modal";
 import DateField from "../DateField";
 import TimeField from "../TimeField";
@@ -8,6 +8,8 @@ import { addClimb, updateClimb } from "../../services/climbsService";
 import { combineDateAndTime, formatTime } from "../../utils/date";
 import { toClimbPeak } from "../../utils/climbs";
 import GpxField from "./GpxField";
+import TrackCheck from "./TrackCheck";
+import { matchPeaksToTrack } from "../../utils/gpx";
 
 // Shared look of the two buttons at the bottom
 const buttonStyle = {
@@ -54,6 +56,12 @@ export default function ClimbFormModal({
   // Points of the file chosen in this session (null = no new file: the saved track stays)
   const [trackPoints, setTrackPoints] = useState(null);
 
+  // Check of every peak against the track loaded in this session (null = no new track)
+  const matches = useMemo(
+    () => (trackPoints ? matchPeaksToTrack(peaks, allPeaks, trackPoints) : null),
+    [peaks, allPeaks, trackPoints]
+  );
+
   async function handleSave() {
     setSaveError("");
     let hasErrors = false;
@@ -80,6 +88,21 @@ export default function ClimbFormModal({
     }
 
     if (hasErrors) return;
+
+    let entries = peaks;
+    if (matches) {
+      // A new track was loaded: write the result of the check on every entry
+      entries = peaks.map((entry, i) => ({
+        ...toClimbPeak(entry),
+        // Client-side check: advisory only, the real verification will be done on a server
+        onTrack: matches[i].matched,
+        // Time of the pass (null if the file has no timestamps)
+        summitAt: matches[i].time,
+      }));
+    } else if (!gpxStats) {
+      // No GPX at all (or removed): entries carry no track data
+      entries = peaks.map(toClimbPeak);
+    }
 
     setIsSaving(true);
     try {
@@ -171,6 +194,7 @@ export default function ClimbFormModal({
         <TimeField label="Time (optional)" value={time} onChange={setTime} />
 
         <GpxField label="GPX track (optional)" value={gpxStats} onChange={handleGpxChange} />
+        <TrackCheck entries={peaks} matches={matches} />
 
         <FormField
           as="textarea"

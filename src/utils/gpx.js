@@ -1,6 +1,7 @@
 const EARTH_RADIUS_M = 6371000;
 // Elevation changes smaller than this are treated as GPS noise, not real climbing
 const ELEVATION_NOISE_M = 3;
+import { PEAK_PASS_TOLERANCE_M } from "../constants/map";
 
 const toRadians = (degrees) => (degrees * Math.PI) / 180;
 
@@ -96,21 +97,32 @@ const METERS_PER_DEGREE = 111320;
 // Starting tolerance of the simplification, in meters
 const START_TOLERANCE_M = 3;
 
-// Distance from point p to the segment a-b (all in meters, flat coordinates)
-function distanceToSegment(p, a, b) {
+// Closest point of the segment a-b to the point p (all in meters, flat coordinates).
+// Returns the distance and t: where that point falls on the segment (0 = at a, 1 = at b).
+function projectOnSegment(p, a, b) {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const lengthSq = dx * dx + dy * dy;
-  // a and b coincide: plain distance to a
-  if (lengthSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
 
-  // Where the projection of p falls on the line a-b: 0 = at a, 1 = at b.
   // Clamped to [0, 1] so we measure to the segment, not to the infinite line.
-  const t = Math.max(
-    0,
-    Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSq)
-  );
-  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+  // If a and b coincide there is nothing to project: t = 0.
+  const t =
+    lengthSq === 0
+      ? 0
+      : Math.max(
+          0,
+          Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSq)
+        );
+
+  return {
+    t,
+    distance: Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy)),
+  };
+}
+
+// Distance from point p to the segment a-b
+function distanceToSegment(p, a, b) {
+  return projectOnSegment(p, a, b).distance;
 }
 
 // One pass of Ramer-Douglas-Peucker. Returns a flag per point: 1 = keep it.
@@ -244,5 +256,72 @@ export function readFileAsText(file) {
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error("Cannot read this file."));
     reader.readAsText(file);
+  });
+}
+
+// Time between two track points, at fraction t of the way. Null if a time is missing.
+function interpolateTime(a, b, t) {
+  const valid = (d) => d instanceof Date && !Number.isNaN(d.getTime());
+  if (!valid(a) || !valid(b)) return null;
+  return new Date(a.getTime() + (b.getTime() - a.getTime()) * t);
+}
+
+// Finds every time the track passes within toleranceM of a peak.
+// Returns the passes in track order: [{ distanceM, time }, ...]
+export function findPeakPasses(points, peak, toleranceM = PEAK_PASS_TOLERANCE_M) {
+  const cosLat = Math.cos(toRadians(peak.lat));
+  // Track points as flat meters, with the peak as the origin (0, 0)
+  const xy = points.map((p) => ({
+    x: (p.lon - peak.lon) * cosLat * METERS_PER_DEGREE,
+    y: (p.lat - peak.lat) * METERS_PER_DEGREE,
+  }));
+  const origin = { x: 0, y: 0 };
+  // To start a NEW pass the track must first get farther than this
+  const leaveM = toleranceM * 2;
+
+  const passes = [];
+  let current = null; // the pass in progress
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const { t, distance } = projectOnSegment(origin, xy[i], xy[i + 1]);
+
+    if (distance <= toleranceM) {
+      if (!current) current = { distanceM: Infinity, time: null };
+      // Inside one pass we keep the closest approach
+      if (distance < current.distanceM) {
+        current.distanceM = distance;
+        current.time = interpolateTime(points[i].time, points[i + 1].time, t);
+      }
+    } else if (current && distance > leaveM) {
+      passes.push(current);
+      current = null;
+    }
+  }
+  if (current) passes.push(current);
+
+  return passes;
+}
+
+// For every entry of the climb: did the track pass by that peak?
+// entries: the climb's peaks ({ id, ... }). allPeaks: peaks.json (it has the coordinates).
+export function matchPeaksToTrack(entries, allPeaks, points) {
+  // Passes found for each peak id, and how many were already given to an entry
+  const passesById = new Map();
+  const usedById = new Map();
+
+  return entries.map((entry) => {
+    if (!passesById.has(entry.id)) {
+      const peak = allPeaks.find((p) => p.id === entry.id);
+      passesById.set(entry.id, peak ? findPeakPasses(points, peak) : []);
+    }
+
+    // The 1st entry of a peak gets its 1st pass, the 2nd entry the 2nd pass...
+    const index = usedById.get(entry.id) ?? 0;
+    usedById.set(entry.id, index + 1);
+    const pass = passesById.get(entry.id)[index];
+
+    return pass
+      ? { matched: true, distanceM: Math.round(pass.distanceM), time: pass.time }
+      : { matched: false, distanceM: null, time: null };
   });
 }

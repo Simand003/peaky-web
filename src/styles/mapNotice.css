@@ -1,0 +1,15 @@
+/* Small message at the bottom of the map, for non-blocking errors */
+.map-notice {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--md-theme-background);
+  color: var(--md-theme-error);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+}

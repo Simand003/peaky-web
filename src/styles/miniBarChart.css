@@ -1,0 +1,54 @@
+.mini-chart {
+  margin-top: 16px;
+}
+
+.mini-chart h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mini-chart__bars {
+  display: flex;
+  gap: 6px;
+}
+
+.mini-chart__column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mini-chart__value {
+  /* Fixed height: columns line up even when the number is missing */
+  height: 14px;
+  font-size: 12px;
+}
+
+/* The area where a bar can grow: the bar sticks to the bottom */
+.mini-chart__track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 64px;
+}
+
+.mini-chart__bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--md-theme-primary);
+}
+
+.mini-chart__label {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.mini-chart__note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  opacity: 0.7;
+}

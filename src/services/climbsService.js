@@ -8,9 +8,10 @@ import {
   Timestamp,
   where,
   writeBatch,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { buildTrackData } from "../utils/gpx";
+import { buildTrackData, decodePolyline } from "../utils/gpx";
 
 // Distinct peak ids: a peak climbed twice in the same outing appears only once here
 const getPeakIds = (peaks) => [...new Set(peaks.map((p) => p.id))];
@@ -124,4 +125,30 @@ export async function deleteClimb(climb) {
   // Only climbs with a GPX can have a track
   if (climb.gpx) batch.delete(doc(db, "tracks", climb.id));
   await batch.commit();
+}
+
+// Reads the stored track of a climb. Returns null if the climb has no track.
+export async function fetchTrack(climbId) {
+  const snap = await getDoc(doc(db, "tracks", climbId));
+  if (!snap.exists()) return null;
+
+  const data = snap.data();
+  return {
+    // The stored text becomes a list of [lat, lon], ready for the map
+    points: decodePolyline(data.polyline),
+    elevations: data.elevations,
+  };
+}
+
+// The climbs of one user that include one peak, most recent first
+export async function fetchUserClimbsForPeak(userId, peakId) {
+  const q = query(
+    collection(db, "climbs"),
+    where("userId", "==", userId),
+    // array-contains: the peakIds list includes this id
+    where("peakIds", "array-contains", peakId),
+    orderBy("climbedAt", "desc")
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }

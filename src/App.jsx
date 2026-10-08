@@ -32,7 +32,7 @@ export default function App() {
       />
 
       <Routes>
-        <Route path="/" element={<MapPage user={user} />} />
+        <Route path="/" element={<MapPage user={user} authLoading={authLoading}/>} />
         <Route
           path="/my-peaks"
           element={<MyPeaksPage user={user} authLoading={authLoading} />}

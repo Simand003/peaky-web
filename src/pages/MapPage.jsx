@@ -3,17 +3,21 @@ import { useSearchParams } from "react-router-dom";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import usePeaks from "../hooks/usePeaks";
+import useTrack from "../hooks/useTrack";
 import PeaksLayer from "../components/map/PeaksLayer";
+import TrackLayer from "../components/map/TrackLayer";
 import ZoomIndicator from "../components/map/ZoomIndicator";
 import PeakDetailPanel from "../components/map/PeakDetailPanel";
 import FlyToPeak from "../components/map/FlyToPeak";
 import SearchBar from "../components/map/SearchBar";
 import ClimbFormModal from "../components/climbs/ClimbFormModal";
+import usePeakClimbs from "../hooks/usePeakClimbs";
+import "../styles/mapNotice.css";
 
 const GRIGNETTA_CENTER = [45.92, 9.39];
 
-// user: the logged-in Firebase user, or null (passed down by App)
-export default function MapPage({ user }) {
+// user: the logged-in Firebase user, or null. authLoading: Firebase is still restoring the session.
+export default function MapPage({ user, authLoading }) {
   const { peaks } = usePeaks();
   const [searchParams] = useSearchParams();
 
@@ -22,6 +26,15 @@ export default function MapPage({ user }) {
     () => (searchParams.get("peaks") ?? "").split(",").filter(Boolean),
     [searchParams]
   );
+
+  // Climb whose track must be drawn: "/?track=CLIMB_ID" (null when opened normally)
+  const urlTrackId = searchParams.get("track");
+  const { track, loading: trackLoading, error: trackError } = useTrack(
+    urlTrackId,
+    user?.uid
+  );
+  // Until the track arrives (or we know it cannot) we do not move the map
+  const waitingForTrack = Boolean(urlTrackId) && (authLoading || trackLoading);
 
   // We store only the id: the peak object is looked up in the loaded list.
   // Opened from the diary with ONE peak: it starts selected.
@@ -43,13 +56,29 @@ export default function MapPage({ user }) {
     [urlPeakIds]
   );
 
-  // Where the map flies when opened from the diary (needs the peaks loaded)
-  const urlTarget = useMemo(() => {
+  // Two separate targets, so that each keeps the same identity as long as its
+  // own data does not change (a new object would trigger a new flight)
+  const trackTarget = useMemo(
+    () => (track ? { bounds: track.points } : null),
+    [track]
+  );
+
+  const peaksTarget = useMemo(() => {
     const found = peaks.filter((p) => urlPeakIds.includes(p.id));
     if (found.length === 0) return null;
     if (found.length === 1) return { center: [found[0].lat, found[0].lon] };
     return { bounds: found.map((p) => [p.lat, p.lon]) };
   }, [peaks, urlPeakIds]);
+
+  // A track contains the peaks of its climb, so it is the best thing to frame
+  const urlTarget = waitingForTrack ? null : (trackTarget ?? peaksTarget);
+
+  const {
+    climbs: myClimbs,
+    loading: myClimbsLoading,
+    error: myClimbsError,
+    reload: reloadMyClimbs,
+  } = usePeakClimbs(selectedId, user?.uid);
 
   function handleSearchSelect(peak) {
     setSelectedId(peak.id);
@@ -73,6 +102,7 @@ export default function MapPage({ user }) {
           attribution="&copy; OpenStreetMap contributors"
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <TrackLayer track={track} />
         <PeaksLayer
           peaks={peaks}
           selectedId={selectedId}
@@ -84,11 +114,18 @@ export default function MapPage({ user }) {
         <ZoomIndicator />
       </MapContainer>
 
+      {trackError && (
+        <div className="map-notice">Cannot load the track: {trackError}</div>
+      )}
+
       <SearchBar peaks={peaks} onSelectPeak={handleSearchSelect} />
 
       <PeakDetailPanel
         peak={selectedPeak}
         user={user}
+        myClimbs={myClimbs}
+        myClimbsLoading={myClimbsLoading}
+        myClimbsError={myClimbsError}
         onAddClimb={() => setIsAddingClimb(true)}
         onClose={() => setSelectedId(null)}
       />
@@ -96,9 +133,9 @@ export default function MapPage({ user }) {
       {isAddingClimb && selectedPeak && user && (
         <ClimbFormModal
           user={user}
-          // The selected peak is only the starting point: more can be added in the form
           initialPeak={selectedPeak}
           allPeaks={peaks}
+          onSaved={reloadMyClimbs}
           onClose={() => setIsAddingClimb(false)}
         />
       )}

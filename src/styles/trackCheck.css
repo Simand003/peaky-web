@@ -1,0 +1,40 @@
+.track-check {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.track-check ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.track-check li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.track-check svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.track-check__ok {
+  color: var(--md-theme-primary);
+}
+
+.track-check__miss {
+  color: var(--md-theme-error);
+}
+
+.track-check__note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--md-theme-on-surface-variant);
+}

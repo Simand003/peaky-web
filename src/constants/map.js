@@ -9,3 +9,6 @@ export const PEAK_ELEVATION_BY_ZOOM = [
   { minZoom: 5, minElevation: 6000 },
   { minZoom: 4, minElevation: 8000 },
 ];
+
+// A peak counts as "reached" if the track passes within this distance (meters)
+export const PEAK_PASS_TOLERANCE_M = 50;
