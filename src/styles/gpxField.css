@@ -1,0 +1,83 @@
+.gpx-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--md-theme-on-surface-variant);
+}
+
+.gpx-field__button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 12px;
+  /* Dashed border: reads as "drop something here" */
+  border: 1px dashed var(--md-theme-outline);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.gpx-field__button:hover {
+  background: var(--md-theme-secondary-container);
+}
+
+.gpx-field__file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--md-theme-on-background);
+  font-size: 15px;
+}
+
+.gpx-field__name {
+  /* Long file names are cut with "..." */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gpx-field__remove {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.gpx-field__remove:hover {
+  background: var(--md-theme-secondary-container);
+}
+
+.gpx-field__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gpx-field__stat {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--md-theme-secondary-container);
+  color: var(--md-theme-on-background);
+  font-size: 14px;
+}
+
+.gpx-field__error {
+  color: var(--md-theme-error);
+  font-size: 12px;
+}
+
+.gpx-field__hint {
+  font-size: 12px;
+  opacity: 0.8;
+}

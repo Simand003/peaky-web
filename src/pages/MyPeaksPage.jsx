@@ -28,7 +28,7 @@ export default function MyPeaksPage({ user, authLoading }) {
   async function handleConfirmDelete() {
     setActionError("");
     try {
-      await deleteClimb(climbToDelete.id);
+      await deleteClimb(climbToDelete);
       reload(); // read the diary again, without the deleted climb
     } catch (e) {
       setActionError(e.message);

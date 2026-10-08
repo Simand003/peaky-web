@@ -1,6 +1,7 @@
 import { Mountain, Pencil, Trash2, MapPin } from "lucide-react";
 import { formatPeakNames } from "../../utils/climbs";
 import { formatDate, formatTime } from "../../utils/date";
+import { formatDistance, formatDuration } from "../../utils/gpx";
 
 // One entry of the diary: peak, date, optional time and report, plus action buttons
 export default function ClimbCard({ climb, onEdit, onDelete, onShowOnMap }) {
@@ -29,6 +30,14 @@ export default function ClimbCard({ climb, onEdit, onDelete, onShowOnMap }) {
           {climb.hasTime && ` · ${formatTime(date)}`}
         </span>
         {climb.notes && <p className="climb-card__report">{climb.notes}</p>}
+
+        {climb.gpx && (
+          <p className="climb-card__gpx">
+            {formatDistance(climb.gpx.distanceM)} · +{climb.gpx.gainM} m
+            {climb.gpx.durationSec !== null &&
+              ` · ${formatDuration(climb.gpx.durationSec)}`}
+          </p>
+        )}
       </div>
 
       <div className="climb-card__actions">

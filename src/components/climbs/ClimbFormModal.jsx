@@ -7,6 +7,7 @@ import PeakPicker from "./PeakPicker";
 import { addClimb, updateClimb } from "../../services/climbsService";
 import { combineDateAndTime, formatTime } from "../../utils/date";
 import { toClimbPeak } from "../../utils/climbs";
+import GpxField from "./GpxField";
 
 // Shared look of the two buttons at the bottom
 const buttonStyle = {
@@ -44,6 +45,15 @@ export default function ClimbFormModal({
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
+  // Summary of the GPX track, or null. In edit mode it starts from the saved one.
+  const [gpxStats, setGpxStats] = useState(
+    climb?.gpx
+      ? { ...climb.gpx, startTime: climb.gpx.startedAt?.toDate() ?? null }
+      : null
+  );
+  // Points of the file chosen in this session (null = no new file: the saved track stays)
+  const [trackPoints, setTrackPoints] = useState(null);
+
   async function handleSave() {
     setSaveError("");
     let hasErrors = false;
@@ -73,9 +83,20 @@ export default function ClimbFormModal({
 
     setIsSaving(true);
     try {
-      const data = { peaks, climbedAt, hasTime, notes: notes.trim() };
+      const data = {
+        peaks,
+        climbedAt,
+        hasTime,
+        notes: notes.trim(),
+        gpx: gpxStats,
+        trackPoints,
+      };
       if (isEditing) {
-        await updateClimb(climb.id, data);
+        await updateClimb(climb.id, {
+          ...data,
+          userId: climb.userId,
+          hadGpx: Boolean(climb.gpx),
+        });
       } else {
         await addClimb({ userId: user.uid, ...data });
       }
@@ -86,6 +107,18 @@ export default function ClimbFormModal({
       setSaveError(e.message);
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  // Called when a GPX is chosen (stats) or removed (null)
+  function handleGpxChange(stats, points) {
+    setGpxStats(stats);
+    setTrackPoints(points);
+    // The track is more reliable than what was typed: it overwrites date and time
+    if (stats?.startTime) {
+      setDate(stats.startTime);
+      setTime(formatTime(stats.startTime));
+      setDateError("");
     }
   }
 
@@ -136,6 +169,8 @@ export default function ClimbFormModal({
         />
 
         <TimeField label="Time (optional)" value={time} onChange={setTime} />
+
+        <GpxField label="GPX track (optional)" value={gpxStats} onChange={handleGpxChange} />
 
         <FormField
           as="textarea"
