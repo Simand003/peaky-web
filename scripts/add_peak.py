@@ -15,6 +15,16 @@ COUNTRIES = {
                "Trentino-Alto Adige", "Umbria", "Valle d'Aosta", "Veneto"]
 }
 
+# ISO 3166-2 codes: OSM stores them on every region, so we can search without relying on the name
+ISO_CODES = {
+    "Abruzzo": "IT-65", "Basilicata": "IT-77", "Calabria": "IT-78", "Campania": "IT-72",
+    "Emilia-Romagna": "IT-45", "Friuli-Venezia Giulia": "IT-36", "Lazio": "IT-62",
+    "Liguria": "IT-42", "Lombardia": "IT-25", "Marche": "IT-57", "Molise": "IT-67",
+    "Piemonte": "IT-21", "Puglia": "IT-75", "Sardegna": "IT-88", "Sicilia": "IT-82",
+    "Toscana": "IT-52", "Trentino-Alto Adige": "IT-32", "Umbria": "IT-55",
+    "Valle d'Aosta": "IT-23", "Veneto": "IT-34",
+}
+
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
 # 🔹 SELEZIONE STATO
@@ -34,9 +44,12 @@ region_name = COUNTRIES[country_name][region_choice]
 print(f"\nImportazione peaks per {region_name}, {country_name}...")
 
 # 🔹 RICHIESTA OVERPASS
+# Search the region by ISO code (fast) instead of by name (slow and fragile)
+iso_code = ISO_CODES[region_name]
+
 query = f"""
-[out:json][timeout:25];
-area["name"="{region_name}"]["boundary"="administrative"]->.searchArea;
+[out:json][timeout:60];
+area["ISO3166-2"="{iso_code}"]->.searchArea;
 node["natural"="peak"](area.searchArea);
 out;
 """

@@ -5,13 +5,21 @@ import ConfirmDialog from "./ConfirmDialog";
 import { logout } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { Settings, LogOut, MountainSnow, Heart } from "lucide-react";
+import useUserProfile from "../hooks/useUserProfile";
 
 // Profile area of the top bar: the round button, the dropdown menu under it,
 // and the confirmation window for logging out.
-export default function ProfileMenu() {
+export default function ProfileMenu({ user }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const navigate = useNavigate();
+
+  // The profile saved in Firestore (it has the name typed during the registration)
+  const profile = useUserProfile(user.uid);
+
+  // First letter of the name, in capitals. If there is no profile yet, use the
+  // name given by Google, then the email.
+  const initial = (profile?.name || user.displayName || user.email || "?")[0].toUpperCase();
 
   // "Log out" row pressed: hide the menu and ask for confirmation
   function handleLogoutClick() {
@@ -39,6 +47,8 @@ export default function ProfileMenu() {
     // Reference box: the menu is positioned relative to this wrapper
     <div style={{ position: "relative" }}>
       <ProfileButton
+        photoUrl={user.photoUrl}
+        initial={initial}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         isOpen={isMenuOpen}
       />

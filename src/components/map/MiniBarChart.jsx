@@ -1,8 +1,10 @@
 import "../../styles/miniBarChart.css";
 
 // A small bar chart made of plain divs.
-// labels and values have the same length: one bar per label.
-export default function MiniBarChart({ title, labels, values, note }) {
+// values: one number per bar.
+// labels (optional): text centered under each bar, same length as values.
+// ticks (optional): text on the boundaries between bars, length = values.length + 1.
+export default function MiniBarChart({ title, labels, ticks, values, note }) {
   // At least 1: avoids dividing by zero when every value is 0
   const max = Math.max(...values, 1);
 
@@ -12,7 +14,7 @@ export default function MiniBarChart({ title, labels, values, note }) {
 
       <div className="mini-chart__bars">
         {values.map((value, i) => (
-          <div key={labels[i]} className="mini-chart__column">
+          <div key={i} className="mini-chart__column">
             <span className="mini-chart__value">{value > 0 ? value : ""}</span>
             <div className="mini-chart__track">
               {/* The height is a percentage of the tallest bar */}
@@ -21,10 +23,21 @@ export default function MiniBarChart({ title, labels, values, note }) {
                 style={{ height: `${(value / max) * 100}%` }}
               />
             </div>
-            <span className="mini-chart__label">{labels[i]}</span>
+            {labels && <span className="mini-chart__label">{labels[i]}</span>}
           </div>
         ))}
       </div>
+
+      {ticks && (
+        <div className="mini-chart__ticks">
+          {ticks.map((tick, i) => (
+            // Boundary i sits at i / (number of bars) of the width
+            <span key={i} style={{ left: `${(i / values.length) * 100}%` }}>
+              {tick}
+            </span>
+          ))}
+        </div>
+      )}
 
       {note && <p className="mini-chart__note">{note}</p>}
     </div>

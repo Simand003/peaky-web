@@ -1,29 +1,49 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Plus, List } from "lucide-react";
 import useUserClimbs from "../hooks/useUserClimbs";
+import usePeaks from "../hooks/usePeaks";
 import ClimbCard from "../components/climbs/ClimbCard";
 import ClimbFormModal from "../components/climbs/ClimbFormModal";
 import ConfirmDialog from "../components/ConfirmDialog";
+import SearchField from "../components/SearchField";
 import { deleteClimb } from "../services/climbsService";
-import { getDiaryStats } from "../utils/climbs";
-import usePeaks from "../hooks/usePeaks";
+import { climbMatchesQuery, formatPeakNames, getDiaryStats } from "../utils/climbs";
+import { formatDistance } from "../utils/gpx";
 import "../styles/myPeaksPage.css";
 
 // user: the logged-in Firebase user, or null (passed down by App)
 export default function MyPeaksPage({ user, authLoading }) {
   const { climbs, loading, error, reload } = useUserClimbs(user?.uid);
+  const { peaks: allPeaks } = usePeaks();
+
+  // id -> peak (with coordinates), to place the peaks of a climb on its small map
+  const peaksById = useMemo(
+    () => new Map(allPeaks.map((p) => [p.id, p])),
+    [allPeaks]
+  );
+
+  // Changing this number gives every card a new key: all cards start closed again
+  const [listVersion, setListVersion] = useState(0);
+  // Text typed in the search box
+  const [query, setQuery] = useState("");
 
   // The climb being edited / waiting for delete confirmation (null = none)
   const [climbToEdit, setClimbToEdit] = useState(null);
   const [climbToDelete, setClimbToDelete] = useState(null);
   const [actionError, setActionError] = useState("");
+  // true while the "Add climb" window is open
+  const [isAddingClimb, setIsAddingClimb] = useState(false);
 
-  // Recompute the stats only when the list of climbs changes
-  const stats = useMemo(() => getDiaryStats(climbs), [climbs]);
+  // Only the climbs that match the search
+  const visibleClimbs = useMemo(
+    () => climbs.filter((climb) => climbMatchesQuery(climb, query)),
+    [climbs, query]
+  );
 
-  const { peaks: allPeaks } = usePeaks();
-  const navigate = useNavigate();
+  // The numbers follow the search. To always show the whole diary instead,
+  // use `climbs` here in place of `visibleClimbs`.
+  const stats = useMemo(() => getDiaryStats(visibleClimbs), [visibleClimbs]);
 
   async function handleConfirmDelete() {
     setActionError("");
@@ -44,7 +64,22 @@ export default function MyPeaksPage({ user, authLoading }) {
           Back to map
         </Link>
 
-        <h1>My peaks</h1>
+        <div className="my-peaks__header">
+          <h1>My peaks</h1>
+          {/* Only logged-in users have a diary */}
+          {user && (
+            <div className="my-peaks__actions">
+              <Link to="/my-peaks/list" className="my-peaks__list-link">
+                <List size={18} />
+                Peaks list
+              </Link>
+              <button className="my-peaks__add" onClick={() => setIsAddingClimb(true)}>
+                <Plus size={18} />
+                Add peak
+              </button>
+            </div>
+          )}
+        </div>
 
         {!user && !authLoading && (
           <p className="my-peaks__message">Log in to see your diary.</p>
@@ -64,45 +99,64 @@ export default function MyPeaksPage({ user, authLoading }) {
         )}
         {user && !loading && !error && climbs.length === 0 && (
           <p className="my-peaks__message">
-            No climbs yet. Open the map, select a peak and press "Add climb".
+            No climbs yet. Press "Add peak" to save your first one.
           </p>
         )}
 
         {climbs.length > 0 && (
           <>
-            <div className="my-peaks__stats">
-              <div>
-                <strong>{stats.totalClimbs}</strong>
-                <span>Climbs</span>
-              </div>
-              <div>
-                <strong>{stats.distinctPeaks}</strong>
-                <span>Peaks</span>
-              </div>
-              <div>
-                <strong>{stats.highest} m</strong>
-                <span>Highest</span>
-              </div>
+            <div className="my-peaks__search">
+              <SearchField
+                value={query}
+                onChange={setQuery}
+                placeholder="Search your climbs by peak name..."
+              />
             </div>
 
-            <ul className="my-peaks__list">
-              {climbs.map((climb) => (
-                <ClimbCard
-                  key={climb.id}
-                  climb={climb}
-                  // peakIds has no duplicates: one id per different peak
-                  onShowOnMap={() => {
-                    // peakIds has no duplicates: one id per different peak
-                    const params = new URLSearchParams({ peaks: climb.peakIds.join(",") });
-                    // Only climbs with a GPX can have a track to draw
-                    if (climb.gpx) params.set("track", climb.id);
-                    navigate(`/?${params}`);
-                  }}
-                  onEdit={() => setClimbToEdit(climb)}
-                  onDelete={() => setClimbToDelete(climb)}
-                />
-              ))}
-            </ul>
+            {visibleClimbs.length === 0 ? (
+              <p className="my-peaks__message">No climbs match "{query.trim()}".</p>
+            ) : (
+              <>
+                <div className="my-peaks__stats">
+                  <div>
+                    <strong>{stats.totalClimbs}</strong>
+                    <span>Climbs</span>
+                  </div>
+                  <div>
+                    <strong>{stats.distinctPeaks}</strong>
+                    <span>Peaks</span>
+                  </div>
+                  <div>
+                    <strong>{stats.totalSummits}</strong>
+                    <span>Total summits</span>
+                  </div>
+                  <div>
+                    <strong>{formatDistance(stats.distanceM)}</strong>
+                    <span>Distance</span>
+                  </div>
+                  <div>
+                    <strong>{stats.gainM} m</strong>
+                    <span>Elevation gain</span>
+                  </div>
+                  <div>
+                    <strong>{stats.highest} m</strong>
+                    <span>Highest peak</span>
+                  </div>
+                </div>
+
+                <ul className="my-peaks__list">
+                  {visibleClimbs.map((climb) => (
+                    <ClimbCard
+                      key={`${listVersion}-${climb.id}`}
+                      climb={climb}
+                      peaksById={peaksById}
+                      onEdit={() => setClimbToEdit(climb)}
+                      onDelete={() => setClimbToDelete(climb)}
+                    />
+                  ))}
+                </ul>
+              </>
+            )}
           </>
         )}
       </div>
@@ -111,7 +165,11 @@ export default function MyPeaksPage({ user, authLoading }) {
         <ClimbFormModal
           climb={climbToEdit}
           allPeaks={allPeaks}
-          onSaved={reload}
+          onSaved={() => {
+            reload();
+            // New keys: every card starts closed, so none keeps an outdated track
+            setListVersion((v) => v + 1);
+          }}
           onClose={() => setClimbToEdit(null)}
         />
       )}
@@ -119,10 +177,20 @@ export default function MyPeaksPage({ user, authLoading }) {
       {climbToDelete && (
         <ConfirmDialog
           title="Delete climb"
-          message={`Delete your climb of ${climbToDelete.peakName}? This cannot be undone.`}
+          message={`Delete your climb of ${formatPeakNames(climbToDelete.peaks)}? This cannot be undone.`}
           confirmLabel="Delete"
           onConfirm={handleConfirmDelete}
           onCancel={() => setClimbToDelete(null)}
+        />
+      )}
+
+      {isAddingClimb && (
+        <ClimbFormModal
+          user={user}
+          allPeaks={allPeaks}
+          // No initialPeak: the peaks list starts empty and you pick them in the form
+          onSaved={reload}
+          onClose={() => setIsAddingClimb(false)}
         />
       )}
     </main>

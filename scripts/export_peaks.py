@@ -14,7 +14,7 @@ db = firestore.client()
 COUNTRIES = {
     "Italia": ["Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", "Friuli-Venezia Giulia", "Lazio",
                "Liguria", "Lombardia", "Marche", "Molise", "Piemonte", "Puglia", "Sardegna", "Sicilia", "Toscana",
-               "Trentino-Alto Adige", "Umbria", "Valle d'Aosta", "Veneto"]
+               "Trentino-Alto Adige", "Umbria", "Valle d'Aosta - Vallèe d'Aoste", "Veneto"]
 }
 
 # Output path: Vite serves the "public" folder at the site root

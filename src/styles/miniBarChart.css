@@ -8,9 +8,10 @@
   font-weight: 600;
 }
 
+/* No gap between columns: each bar has its own side margin, so the boundary
+   between two columns is at exactly i / n of the width */
 .mini-chart__bars {
   display: flex;
-  gap: 6px;
 }
 
 .mini-chart__column {
@@ -32,17 +33,35 @@
 .mini-chart__track {
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   width: 100%;
   height: 64px;
 }
 
 .mini-chart__bar {
-  width: 100%;
+  /* 2px of space on each side of the bar */
+  width: calc(100% - 4px);
   border-radius: 4px 4px 0 0;
   background: var(--md-theme-primary);
 }
 
 .mini-chart__label {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Axis with marks on the boundaries between columns */
+.mini-chart__ticks {
+  position: relative;
+  height: 18px;
+  border-top: 1px solid var(--md-theme-outline-variant);
+}
+
+.mini-chart__ticks span {
+  position: absolute;
+  top: 2px;
+  /* Centers each text on its boundary */
+  transform: translateX(-50%);
   font-size: 11px;
   opacity: 0.7;
 }

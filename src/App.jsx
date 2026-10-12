@@ -5,6 +5,7 @@ import { useState } from "react"
 import useAuth from "./hooks/useAuth";
 import MapPage from "./pages/MapPage";
 import MyPeaksPage from "./pages/MyPeaksPage";
+import PeaksListPage from "./pages/PeaksListPage";
 import { Routes, Route } from "react-router-dom";
 
 export default function App() {
@@ -32,11 +33,13 @@ export default function App() {
       />
 
       <Routes>
-        <Route path="/" element={<MapPage user={user} authLoading={authLoading}/>} />
+        <Route path="/" element={<MapPage user={user} authLoading={authLoading} />} />
         <Route
           path="/my-peaks"
-          element={<MyPeaksPage user={user} authLoading={authLoading} />}
-        />
+          element={<MyPeaksPage user={user} authLoading={authLoading} />} />
+        <Route
+          path="/my-peaks/list"
+          element={<PeaksListPage user={user} authLoading={authLoading} />} />
       </Routes>
       {authMode && (
         <AuthModal initialMode={authMode} onClose={() => setAuthMode(null)} />

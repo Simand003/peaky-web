@@ -107,7 +107,7 @@ export default function ClimbFormModal({
     setIsSaving(true);
     try {
       const data = {
-        peaks,
+        peaks: entries, // the list with onTrack and summitAt
         climbedAt,
         hasTime,
         notes: notes.trim(),
@@ -170,7 +170,7 @@ export default function ClimbFormModal({
   }
 
   return (
-    <Modal title={isEditing ? "Edit climb" : "Add climb"} onClose={onClose} width={440}>
+    <Modal title={isEditing ? "Edit climb" : "Add peak"} onClose={onClose} width={440}>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <PeakPicker
           label="Peaks*"
@@ -195,6 +195,16 @@ export default function ClimbFormModal({
 
         <GpxField label="GPX track (optional)" value={gpxStats} onChange={handleGpxChange} />
         <TrackCheck entries={peaks} matches={matches} />
+
+        {/* Editing a climb whose GPX file is not stored: some peaks cannot get a summit time */}
+        {isEditing &&
+          gpxStats &&
+          !trackPoints &&
+          peaks.some((p) => p.summitAt === undefined) && (
+            <p className="track-check__note">
+              Some peaks have no summit time. Load the GPX file again to calculate it.
+            </p>
+          )}
 
         <FormField
           as="textarea"

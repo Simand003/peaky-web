@@ -16,11 +16,34 @@
 }
 
 .my-peaks__content h1 {
-  margin: 16px 0 24px;
+  margin: 0;
   font-size: 28px;
   color: var(--md-theme-primary);
 }
 
+/* Title on the left, button on the right */
+.my-peaks__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.my-peaks__add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
+  background: var(--md-theme-primary);
+  color: var(--md-theme-on-primary, #ffffff);
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+}
 .my-peaks__back {
   display: inline-flex;
   align-items: center;
@@ -38,15 +61,16 @@
   color: var(--md-theme-error);
 }
 
-/* Three summary boxes side by side */
 .my-peaks__stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 24px;
 }
 
 .my-peaks__stats > div {
-  flex: 1;
+  /* Lets the box shrink inside the grid instead of pushing it wider */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -64,6 +88,13 @@
   opacity: 0.8;
 }
 
+/* Phones: slightly smaller numbers, so "1234.5 km" still fits in a box */
+@media (max-width: 600px) {
+  .my-peaks__stats strong {
+    font-size: 18px;
+  }
+}
+
 .my-peaks__list {
   display: flex;
   flex-direction: column;
@@ -73,8 +104,10 @@
   list-style: none;
 }
 
+/* The card is a column: the clickable row on top, the details below */
 .climb-card {
   display: flex;
+  flex-direction: column;
   gap: 14px;
   padding: 16px;
   border: 1px solid var(--md-theme-outline-variant);
@@ -105,17 +138,6 @@
 .climb-card__meta {
   font-size: 14px;
   opacity: 0.8;
-}
-
-/* The report is cut after 3 lines, so long texts do not stretch the card */
-.climb-card__report {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin: 10px 0 0;
-  font-size: 15px;
-  white-space: pre-line;
 }
 
 .climb-card__actions {
@@ -152,4 +174,104 @@
   margin: 4px 0 0;
   font-size: 14px;
   opacity: 0.8;
+}
+
+.climb-card__summits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.climb-card__summit {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--md-theme-secondary-container);
+  color: var(--md-theme-on-background);
+  font-size: 13px;
+}
+
+.climb-card__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+/* Icon + text: the part you click to open the card */
+.climb-card__toggle-area {
+  display: flex;
+  flex: 1;
+  gap: 14px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.climb-card__chevron svg {
+  transition: transform 0.2s;
+}
+
+.climb-card__chevron.is-open svg {
+  transform: rotate(180deg);
+}
+
+.climb-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* isolation: the map's internal z-indexes (up to 1000) stay inside this box,
+   so the map never covers menus and dialogs */
+.climb-map {
+  isolation: isolate;
+  height: 260px;
+  overflow: hidden;
+  border: 1px solid var(--md-theme-outline-variant);
+  border-radius: 10px;
+}
+
+.climb-card__note {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.climb-card__note--error {
+  color: var(--md-theme-error);
+  opacity: 1;
+}
+
+/* Notes in the open card: the whole text, line breaks included */
+.climb-card__notes {
+  margin: 0;
+  font-size: 15px;
+  white-space: pre-line;
+}
+
+/* Space between the title, the search box and the summary numbers */
+.my-peaks__search {
+  margin-bottom: 20px;
+}
+
+/* In the header rule you already have, add this line: */
+/*   flex-wrap: wrap; */
+
+.my-peaks__actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Secondary button: outline instead of filled, same size as "Add peak" */
+.my-peaks__list-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 9px 18px;
+  border: 1px solid var(--md-theme-outline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--md-theme-primary);
+  font-size: 15px;
+  text-decoration: none;
 }

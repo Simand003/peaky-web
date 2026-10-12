@@ -26,7 +26,7 @@ export default function TopBar({ user, onSignUpClick, onLoginClick, authLoading 
 
       {/* Right side: round button if logged in, otherwise Login and Sign up */}
       {authLoading ? null : user ? (
-        <ProfileMenu />
+        <ProfileMenu user={user}/>
       ) : (
         <div
           style={{

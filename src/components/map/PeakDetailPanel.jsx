@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import MiniBarChart from "./MiniBarChart";
 import { formatDate } from "../../utils/date";
 import {
-  DAYPART_LABELS,
+  DAYPART_TICKS,
   WEEKDAY_LABELS,
   countByDaypart,
   countByWeekday,
@@ -67,9 +67,10 @@ export default function PeakDetailPanel({
             onClick={onAddClimb}
             // Only logged-in users have a diary
             disabled={!user}
+            // style={ {fontFamily: 'inherit', fontSize: '18px'}}
           >
             <Plus size={18} />
-            Add climb
+            Add peak
           </button>
           {!user && (
             <p className="peak-panel__hint">Log in to save this climb in your diary.</p>
@@ -123,7 +124,7 @@ export default function PeakDetailPanel({
                 />
                 <MiniBarChart
                   title="By time of day"
-                  labels={DAYPART_LABELS}
+                  ticks={DAYPART_TICKS}
                   values={stats.byDaypart}
                   note={
                     stats.withoutTime > 0

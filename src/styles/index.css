@@ -19,3 +19,11 @@ body {
 :root {
   --topbar-height: 64px;
 }
+
+/* Buttons and fields do not inherit the page font by default: this makes them do it */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}

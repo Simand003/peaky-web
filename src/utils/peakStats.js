@@ -1,23 +1,25 @@
 export const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-// Six slots of four hours: 0-4, 4-8, ...
-export const DAYPART_LABELS = ["0-2", "2-4", "4-6", "6-8","8-12", "12-14", "14-16", "16-18","18-20", "20-22","22-24"];
+export const DAYPART_TICKS = Array.from({ length: 13 }, (_, i) => String(i * 2));
 
 // Turns the user's climbs into one entry per ascent OF THIS PEAK
 // (a climb can contain the same peak more than once)
 export function getPeakAscents(climbs, peakId) {
-  return climbs.flatMap((climb) =>
-    climb.peaks
-      .filter((entry) => entry.id === peakId)
-      .map((entry) => {
-        // Exact summit time if the GPX gave one, otherwise the time of the outing
-        const summitAt = entry.summitAt?.toDate() ?? null;
-        return {
-          date: summitAt ?? climb.climbedAt.toDate(),
-          // The time of day counts only when we really know it
-          hasTime: summitAt !== null || climb.hasTime,
-        };
-      })
-  );
+  return climbs.flatMap((climb) => {
+    const entries = climb.peaks.filter((entry) => entry.id === peakId);
+    const outingDate = climb.climbedAt.toDate();
+
+    return entries.map((entry) => {
+      // Exact time of THIS ascent: only a GPX pass can give it
+      const summitAt = entry.summitAt?.toDate() ?? null;
+      if (summitAt) return { date: summitAt, hasTime: true };
+
+      // No time of its own. The time of the outing can stand in for the ascent
+      // only when it is the one possible time: a manual climb (no GPX) in which
+      // this peak appears once. Otherwise we would pile every ascent on one time.
+      const outingTimeFits = !climb.gpx && entries.length === 1 && climb.hasTime;
+      return { date: outingDate, hasTime: outingTimeFits };
+    });
+  });
 }
 
 // Ascents per day of the week, Monday first
@@ -30,7 +32,7 @@ export function countByWeekday(ascents) {
   return counts;
 }
 
-// Ascents per part of the day (only those with a known time)
+// Ascents per part of the day: 12 slots of two hours (only those with a known time)
 export function countByDaypart(ascents) {
   const counts = Array(12).fill(0);
   for (const a of ascents) {

@@ -1,0 +1,73 @@
+/* On narrow screens the table scrolls sideways inside this box */
+.peaks-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--md-theme-outline-variant);
+  border-radius: 12px;
+}
+
+.peaks-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 15px;
+  color: var(--md-theme-on-background);
+}
+
+.peaks-table th,
+.peaks-table td {
+  padding: 12px 14px;
+  /* Numbers are right-aligned: easier to compare */
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* The first column holds the names: left-aligned, long names can wrap */
+.peaks-table th:first-child,
+.peaks-table td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+
+.peaks-table thead th {
+  background: var(--md-theme-secondary-container);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.peaks-table tbody tr + tr td {
+  border-top: 1px solid var(--md-theme-outline-variant);
+}
+
+/* The name column stays visible while the rest scrolls sideways */
+.peaks-table th:first-child,
+.peaks-table td:first-child {
+  position: sticky;
+  left: 0;
+}
+
+.peaks-table th:first-child {
+  background: var(--md-theme-secondary-container);
+}
+
+.peaks-table td:first-child {
+  background: var(--md-theme-background);
+}
+
+/* The header text is a button, so the whole label is clickable */
+.peaks-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.peaks-list__note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  opacity: 0.7;
+}
