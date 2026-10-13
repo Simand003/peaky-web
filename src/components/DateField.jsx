@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { DayPicker } from "react-day-picker";
-import { Calendar } from "lucide-react";
-// Calendar styles that come with the library (layout, arrows, day cells)
+import { Calendar, ChevronDown } from "lucide-react";
 import "react-day-picker/style.css";
+import "../styles/dateField.css";
 import FormField from "./FormField";
 import { formatDate } from "../utils/date";
 
-// Date field: a box showing the date as dd/MM/yyyy. Clicking it opens a calendar below.
-// value: a Date, or undefined when nothing is chosen.
-// onChange: called with the Date the user picks.
-// error: message shown below. endAdornment: extra element inside the box (e.g. info button).
+const months = [
+  "Gennaio", "Febbraio", "Marzo", "Aprile",
+  "Maggio", "Giugno", "Luglio", "Agosto",
+  "Settembre", "Ottobre", "Novembre", "Dicembre",
+];
+
 export default function DateField({
   label,
   value,
@@ -18,40 +20,75 @@ export default function DateField({
   endAdornment,
   startMonth = new Date(1920, 0),
   defaultMonth = new Date(2000, 0),
-  captionLayout = "dropdown", }) {
-
+}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [displayMonth, setDisplayMonth] = useState(
+    () => value ?? defaultMonth
+  );
+  const [openMenu, setOpenMenu] = useState(null);
 
-  // Called when the user clicks a day in the calendar
-  function handleSelect(date) {
+  const currentMonth = new Date();
+  const firstYear = startMonth.getFullYear();
+  const lastYear = currentMonth.getFullYear();
+
+  const years = Array.from(
+    { length: lastYear - firstYear + 1 },
+    (_, i) => lastYear - i
+  );
+
+  function selectDate(date) {
+    if (!date) return;
     onChange(date);
-    setIsOpen(false); // close the calendar once a day is chosen
+    setDisplayMonth(date);
+    setIsOpen(false);
+    setOpenMenu(null);
+  }
+
+  function selectMonth(month) {
+    setDisplayMonth(
+      new Date(displayMonth.getFullYear(), month, 1)
+    );
+    setOpenMenu(null);
+  }
+
+  function selectYear(year) {
+    const month = displayMonth.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    const day = Math.min(displayMonth.getDate(), lastDay);
+
+    setDisplayMonth(new Date(year, month, day));
+    setOpenMenu(null);
+  }
+
+  function toggleCalendar() {
+    if (!isOpen) {
+      setDisplayMonth(value ?? defaultMonth);
+    }
+    setIsOpen(!isOpen);
+    setOpenMenu(null);
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="date-field">
       <FormField
         label={label}
-        readOnly // the date can only be chosen from the calendar, not typed
+        readOnly
         placeholder="dd/mm/yyyy"
         value={value ? formatDate(value) : ""}
-        onClick={() => setIsOpen(true)} // clicking the box opens the calendar
+        onClick={() => {
+          if (!isOpen) {
+            setDisplayMonth(value ?? defaultMonth);
+          }
+          setIsOpen(true);
+        }}
         error={error}
         endAdornment={
-          // A fragment <> ... </> groups two elements without adding a wrapper to the page
           <>
             <button
               type="button"
-              onClick={() => setIsOpen(!isOpen)} // flip open <-> closed
-              aria-label="Open calendar"
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                padding: 4,
-                color: "var(--md-theme-on-surface-variant)",
-              }}
+              onClick={toggleCalendar}
+              aria-label="Apri calendario"
+              className="date-field__calendar-button"
             >
               <Calendar size={20} />
             </button>
@@ -60,29 +97,99 @@ export default function DateField({
         }
       />
 
-      {/* The calendar is shown right under the field, inside the modal */}
       {isOpen && (
-        <div
-          style={{
-            alignSelf: "center", // center it inside the modal
-            border: "1px solid var(--md-theme-outline-variant)",
-            borderRadius: 12,
-            padding: 8,
-          }}
-        >
+        <div className="date-field__calendar">
+          <div className="date-field__selectors">
+            <div className="date-field__menu-wrapper">
+              <button
+                type="button"
+                className="date-field__selector"
+                aria-expanded={openMenu === "month"}
+                onClick={() =>
+                  setOpenMenu(openMenu === "month" ? null : "month")
+                }
+              >
+                {months[displayMonth.getMonth()]}
+                <ChevronDown size={16} />
+              </button>
+
+              {openMenu === "month" && (
+                <div className="date-field__options">
+                  {months.map((month, index) => {
+                    const isFuture =
+                      displayMonth.getFullYear() === lastYear &&
+                      index > currentMonth.getMonth();
+
+                    return (
+                      <button
+                        type="button"
+                        key={month}
+                        disabled={isFuture}
+                        className={
+                          index === displayMonth.getMonth()
+                            ? "date-field__option is-selected"
+                            : "date-field__option"
+                        }
+                        onClick={() => selectMonth(index)}
+                      >
+                        {month}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="date-field__menu-wrapper">
+              <button
+                type="button"
+                className="date-field__selector"
+                aria-expanded={openMenu === "year"}
+                onClick={() =>
+                  setOpenMenu(openMenu === "year" ? null : "year")
+                }
+              >
+                {displayMonth.getFullYear()}
+                <ChevronDown size={16} />
+              </button>
+
+              {openMenu === "year" && (
+                <div className="date-field__options date-field__years">
+                  {years.map((year) => (
+                    <button
+                      type="button"
+                      key={year}
+                      className={
+                        year === displayMonth.getFullYear()
+                          ? "date-field__option is-selected"
+                          : "date-field__option"
+                      }
+                      onClick={() => selectYear(year)}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           <DayPicker
-            mode="single" // only one day can be selected
-            selected={value} // the day highlighted in the calendar
-            onSelect={handleSelect}
-            captionLayout={captionLayout}
+            mode="single"
+            selected={value}
+            onSelect={selectDate}
+            month={displayMonth}
+            onMonthChange={setDisplayMonth}
             startMonth={startMonth}
-            defaultMonth={value ?? defaultMonth}
-            endMonth={new Date()} // latest month offered: the current one
-            disabled={{ after: new Date() }} // days in the future cannot be selected
-            // Library colors, replaced with our brown palette from colors.css
+            endMonth={currentMonth}
+            disabled={{ after: new Date() }}
+            classNames={{
+              month_caption: "date-field__hidden-caption",
+            }}
             style={{
               "--rdp-accent-color": "var(--md-theme-primary)",
-              "--rdp-accent-background-color": "var(--md-theme-secondary-container)",
+              "--rdp-accent-background-color":
+                "var(--md-theme-secondary-container)",
             }}
           />
         </div>

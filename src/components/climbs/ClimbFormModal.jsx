@@ -186,12 +186,12 @@ export default function ClimbFormModal({
           onChange={setDate}
           error={dateError}
           // Recent dates: open on the current month, navigate with arrows
-          startMonth={new Date(2000, 0)}
+          startMonth={new Date(1900, 0)}
           defaultMonth={new Date()}
-          captionLayout="label"
+          captionLayout="dropdown"
         />
 
-        <TimeField label="Time (optional)" value={time} onChange={setTime} />
+        <TimeField label="Starting time (optional)" value={time} onChange={setTime} />
 
         <GpxField label="GPX track (optional)" value={gpxStats} onChange={handleGpxChange} />
         <TrackCheck entries={peaks} matches={matches} />
