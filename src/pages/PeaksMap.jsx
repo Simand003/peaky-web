@@ -1,23 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "./firebase";
 import "leaflet/dist/leaflet.css";
 
 export default function PeaksMap() {
   const [peaks, setPeaks] = useState([]);
   const [error, setError] = useState(null);
-
-  // Al primo render legge tutta la collezione "peaks"
-  /*
-  useEffect(() => {
-    getDocs(collection(db, "peaks"))
-      .then((snap) =>
-        setPeaks(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
-      )
-      .catch((e) => setError(e.message));
-  }, []);
-  */
 
   return (
     <>

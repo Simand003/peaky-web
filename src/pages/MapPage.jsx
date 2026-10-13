@@ -12,6 +12,7 @@ import FlyToPeak from "../components/map/FlyToPeak";
 import SearchBar from "../components/map/SearchBar";
 import ClimbFormModal from "../components/climbs/ClimbFormModal";
 import usePeakClimbs from "../hooks/usePeakClimbs";
+import UserLocation from "../components/map/UserLocation";
 import "../styles/mapNotice.css";
 
 const GRIGNETTA_CENTER = [45.92, 9.39];
@@ -112,6 +113,7 @@ export default function MapPage({ user, authLoading }) {
         {/* A search overrides the target coming from the diary */}
         <FlyToPeak target={searchTarget ?? urlTarget} />
         <ZoomIndicator />
+        <UserLocation />
       </MapContainer>
 
       {trackError && (
