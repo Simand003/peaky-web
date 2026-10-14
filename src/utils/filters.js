@@ -30,12 +30,13 @@ export function rangeFilter({ key, label, unit = "", get }) {
 // Single choice filter: one option at a time, or "All" (no filter).
 // options: [{ value: "with", label: "With GPX" }, ...]
 // test(item, value): does the item pass when this option is chosen?
-export function choiceFilter({ key, label, options, test }) {
+export function choiceFilter({ key, label, options, test, unavailable = () => null }) {
   return {
     key,
     label,
     kind: "choice",
     options,
+    unavailable,
     // value: the chosen option's value, or null for "All"
     isActive: (value) => value != null,
     test,
@@ -69,5 +70,25 @@ export function dateRangeFilter({ key, label, get }) {
       if (from) return `from ${formatDate(from)}`;
       return `until ${formatDate(to)}`;
     },
+  };
+}
+
+// Multiple choice filter: any number of values of a field. The item passes if its
+// value is ANY of the chosen ones. The available values are read from the data itself,
+// so nobody lists them by hand.
+// get(item): the value of the item this filter looks at (e.g. its region).
+export function optionsFilter({ key, label, get }) {
+  return {
+    key,
+    label,
+    kind: "options",
+    get,
+    // value: array of the chosen values
+    isActive: (value) => Array.isArray(value) && value.length > 0,
+    test: (item, value) => value.includes(get(item)),
+    describe: (value) =>
+      value.length <= 2
+        ? value.join(", ")
+        : `${value[0]}, ${value[1]} +${value.length - 2}`,
   };
 }

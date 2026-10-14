@@ -3,8 +3,10 @@ import { useCallback, useMemo, useState } from "react";
 // Keeps the filter values and applies them to a list.
 // defs: the page's filter definitions (a constant outside the component).
 // items: the list to filter.
+// context: extra data some filters need (e.g. which peaks you already climbed).
+//   Keep it stable with useMemo, or the list is filtered again at every render.
 // Returns ONE object that pages pass as the `filters` prop to the shared components.
-export default function useFilters(defs, items) {
+export default function useFilters(defs, items, context = null) {
   // { [key]: value } with the values chosen so far
   const [values, setValues] = useState({});
   // Panel state lives here, so both the button and the chips can open it
@@ -20,9 +22,9 @@ export default function useFilters(defs, items) {
   const filteredItems = useMemo(() => {
     if (activeDefs.length === 0) return items;
     return items.filter((item) =>
-      activeDefs.every((def) => def.test(item, values[def.key]))
+      activeDefs.every((def) => def.test(item, values[def.key], context))
     );
-  }, [items, activeDefs, values]);
+  }, [items, activeDefs, values, context]);
 
   const setValue = useCallback(
     (key, value) => setValues((current) => ({ ...current, [key]: value })),
@@ -50,6 +52,8 @@ export default function useFilters(defs, items) {
 
   return {
     defs,
+    items,
+    context,
     values,
     activeDefs,
     activeCount: activeDefs.length,

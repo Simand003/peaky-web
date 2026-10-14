@@ -47,10 +47,11 @@ for doc in query.stream():
     new_peaks.append({
         "id": doc.id,
         "name": data["name"],
-        # Round coordinates: 5 decimals is about 1 meter, enough for a map marker
         "lat": round(data["lat"], 5),
         "lon": round(data["lon"], 5),
         "elevation": data["elevation"],
+        "region": data.get("region", ""),
+        "country": data.get("country", ""),
     })
 
 # Stop early if the region has no peaks: nothing to update

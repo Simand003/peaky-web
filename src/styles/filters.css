@@ -383,3 +383,36 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* ---------- Options editor (multiple choice) ---------- */
+
+.options-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.options-editor__option {
+  padding: 6px 12px;
+  border: 1px solid var(--md-theme-outline);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.options-editor__option.is-selected {
+  border-color: var(--md-theme-primary);
+  background: var(--md-theme-secondary-container);
+  color: var(--md-theme-primary);
+  font-weight: 600;
+}
+
+/* Message shown instead of the buttons when a filter cannot be used */
+.choice-editor__unavailable {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}

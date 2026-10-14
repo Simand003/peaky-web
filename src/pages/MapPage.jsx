@@ -12,7 +12,13 @@ import FlyToPeak from "../components/map/FlyToPeak";
 import SearchBar from "../components/map/SearchBar";
 import ClimbFormModal from "../components/climbs/ClimbFormModal";
 import usePeakClimbs from "../hooks/usePeakClimbs";
+import useFilters from "../hooks/useFilters";
+import useUserClimbs from "../hooks/useUserClimbs";
+import FilterButton from "../components/filters/FilterButton";
+import { MAP_FILTERS } from "../constants/mapFilters";
+import "../styles/mapToolbar.css";
 import UserLocation from "../components/map/UserLocation";
+
 import "../styles/mapNotice.css";
 
 const GRIGNETTA_CENTER = [45.92, 9.39];
@@ -20,6 +26,32 @@ const GRIGNETTA_CENTER = [45.92, 9.39];
 // user: the logged-in Firebase user, or null. authLoading: Firebase is still restoring the session.
 export default function MapPage({ user, authLoading }) {
   const { peaks } = usePeaks();
+
+  // Your climbs: the "Climbed" filter needs to know which peaks you already did
+  const { climbs } = useUserClimbs(user?.uid);
+  const climbedIds = useMemo(
+    () => new Set(climbs.flatMap((c) => c.peakIds ?? [])),
+    [climbs]
+  );
+
+  // Extra data the filters may need. useMemo keeps it the same object between renders.
+  const loggedIn = Boolean(user);
+  const filterContext = useMemo(
+    () => ({ loggedIn, climbedIds }),
+    [loggedIn, climbedIds]
+  );
+
+  const filters = useFilters(MAP_FILTERS, peaks, filterContext);
+
+  // Ids of the peaks that pass the filters, or null when no filter is active
+  const filteredIds = useMemo(
+    () =>
+      filters.activeCount > 0
+        ? new Set(filters.filteredItems.map((p) => p.id))
+        : null,
+    [filters.activeCount, filters.filteredItems]
+  );
+
   const [searchParams] = useSearchParams();
 
   // Peaks coming from the diary: "/?peaks=12,34,56" (empty when opened normally)
@@ -108,6 +140,7 @@ export default function MapPage({ user, authLoading }) {
           peaks={peaks}
           selectedId={selectedId}
           highlightedIds={highlightedIds}
+          filteredIds={filteredIds}
           onSelectPeak={(peak) => setSelectedId(peak.id)}
         />
         {/* A search overrides the target coming from the diary */}
@@ -120,7 +153,11 @@ export default function MapPage({ user, authLoading }) {
         <div className="map-notice">Cannot load the track: {trackError}</div>
       )}
 
-      <SearchBar peaks={peaks} onSelectPeak={handleSearchSelect} />
+      {/* Search bar and filters in one row, floating over the map */}
+      <div className="map-toolbar">
+        <SearchBar peaks={peaks} onSelectPeak={handleSearchSelect} />
+        <FilterButton filters={filters} />
+      </div>
 
       <PeakDetailPanel
         peak={selectedPeak}

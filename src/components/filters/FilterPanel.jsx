@@ -1,12 +1,14 @@
-import RangeEditor from "./RangeEditor";
 import ChoiceEditor from "./ChoiceEditor";
 import DateRangeEditor from "./DateRangeEditor";
+import OptionsEditor from "./OptionsEditor";
+import RangeEditor from "./RangeEditor";
 
 // Which editor to use for each kind of filter. New kinds are added here.
 const EDITORS = {
   range: RangeEditor,
   choice: ChoiceEditor,
   dateRange: DateRangeEditor,
+  options: OptionsEditor,
 };
 
 // The popup with one section per filter. align: which edge of the button it sticks to.
@@ -38,6 +40,9 @@ export default function FilterPanel({ filters, align }) {
               value={filters.values[def.key]}
               onChange={(value) => filters.setValue(def.key, value)}
               autoFocus={isFocused}
+              // Some editors need the full list or the page's extra data
+              items={filters.items}
+              context={filters.context}
             />
           </section>
         );

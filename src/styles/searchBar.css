@@ -1,11 +1,9 @@
 /* Floating search, centered under the top bar */
+/* The search bar is a child of .map-toolbar, which does the positioning */
 .search-bar {
-  position: fixed;
-  top: calc(var(--topbar-height, 64px) + 12px);
-  left: 12px;
-  width: min(360px, calc(100vw - 24px));
-  /* Above Leaflet panes and controls (up to 1000) */
-  z-index: 1200;
+  position: relative;
+  flex: 1;
+  min-width: 0;
 }
 
 .search-bar__field {

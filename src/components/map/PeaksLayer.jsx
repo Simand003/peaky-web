@@ -2,7 +2,13 @@ import { useMemo, useState } from "react";
 import { CircleMarker, useMap, useMapEvents } from "react-leaflet";
 import { getMinElevation } from "../../utils/peaks";
 
-export default function PeaksLayer({ peaks, selectedId, onSelectPeak, highlightedIds }) {
+export default function PeaksLayer({
+  peaks,
+  selectedId,
+  highlightedIds,
+  filteredIds,
+  onSelectPeak,
+}) {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
 
@@ -15,13 +21,15 @@ export default function PeaksLayer({ peaks, selectedId, onSelectPeak, highlighte
   // The selected peak always stays visible, even if we zoom out below its threshold
   const visiblePeaks = useMemo(
     () =>
-      peaks.filter(
-        (p) =>
-          p.elevation >= minElevation ||
-          p.id === selectedId ||
-          highlightedIds.has(p.id)
-      ),
-    [peaks, minElevation, selectedId, highlightedIds]
+      peaks.filter((p) => {
+        // The selected peak and the highlighted ones are always visible
+        if (p.id === selectedId || highlightedIds.has(p.id)) return true;
+        // Filters active: show every peak that passes them, whatever the zoom
+        if (filteredIds) return filteredIds.has(p.id);
+        // No filters: the usual rule, only the higher peaks when zoomed out
+        return p.elevation >= minElevation;
+      }),
+    [peaks, minElevation, selectedId, highlightedIds, filteredIds]
   );
 
   return visiblePeaks.map((p) => {
