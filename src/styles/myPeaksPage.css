@@ -248,9 +248,34 @@
   white-space: pre-line;
 }
 
-/* Space between the title, the search box and the summary numbers */
-.my-peaks__search {
+/* Search box and the two buttons on one row */
+.my-peaks__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 20px;
+}
+
+/* The search box takes the space the buttons leave */
+.my-peaks__toolbar .search-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Boxes with the same height and rounded corners as the search box */
+.my-peaks__toolbar .filter-button__trigger,
+.my-peaks__toolbar .sort-button__trigger {
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+}
+
+/* Phones: only the icons, so the search box keeps its space */
+@media (max-width: 600px) {
+  .my-peaks__toolbar .filter-button__label,
+  .my-peaks__toolbar .sort-button__label {
+    display: none;
+  }
 }
 
 /* In the header rule you already have, add this line: */

@@ -1,4 +1,4 @@
-import { Mountain, X, Plus } from "lucide-react";
+import { Mountain, X, Plus, Heart } from "lucide-react";
 import usePeakDetails from "../../hooks/usePeakDetails";
 import "../../styles/peakPanel.css";
 import { useMemo } from "react";
@@ -18,6 +18,7 @@ export default function PeakDetailPanel({
   myClimbs,
   myClimbsLoading,
   myClimbsError,
+  onAddFavourite,
   onAddClimb,
   onClose,
 }) {
@@ -61,21 +62,27 @@ export default function PeakDetailPanel({
       </header>
 
       <div className="peak-panel__body">
-        <section>
+        <section className="peak-panel__button">
           <button
-            className="peak-panel__action"
-            onClick={onAddClimb}
-            // Only logged-in users have a diary
+            className="peak-panel__add-fav"
+            onClick={onAddFavourite}
             disabled={!user}
-            // style={ {fontFamily: 'inherit', fontSize: '18px'}}
+          >
+            <Heart size={18} />
+            Add to favourites
+          </button>
+          <button
+            className="peak-panel__add-peak"
+            onClick={onAddClimb}
+            disabled={!user}
           >
             <Plus size={18} />
             Add peak
           </button>
-          {!user && (
-            <p className="peak-panel__hint">Log in to save this climb in your diary.</p>
-          )}
         </section>
+        {!user && (
+            <p className="peak-panel__hint">Log in to use Add options.</p>
+          )}
         <section>
           <h3>Info</h3>
           {loading && <p className="peak-panel__empty">Loading...</p>}

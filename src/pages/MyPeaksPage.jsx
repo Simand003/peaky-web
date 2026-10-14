@@ -1,16 +1,26 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Plus, List } from "lucide-react";
+import { ArrowLeft, List, Plus } from "lucide-react";
 import useUserClimbs from "../hooks/useUserClimbs";
 import usePeaks from "../hooks/usePeaks";
+import useFilters from "../hooks/useFilters";
+import useSort from "../hooks/useSort";
 import ClimbCard from "../components/climbs/ClimbCard";
 import ClimbFormModal from "../components/climbs/ClimbFormModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import SearchField from "../components/SearchField";
+import FilterButton from "../components/filters/FilterButton";
+import ActiveFilters from "../components/filters/ActiveFilters";
+import SortButton from "../components/filters/SortButton";
+import { CLIMB_FILTERS } from "../constants/climbFilters";
+import { CLIMB_SORTS } from "../constants/climbSorts";
 import { deleteClimb } from "../services/climbsService";
 import { climbMatchesQuery, formatPeakNames, getDiaryStats } from "../utils/climbs";
 import { formatDistance } from "../utils/gpx";
 import "../styles/myPeaksPage.css";
+
+// The diary starts with the most recent climbs on top
+const INITIAL_SORT = { key: "date", dir: "desc" };
 
 // user: the logged-in Firebase user, or null (passed down by App)
 export default function MyPeaksPage({ user, authLoading }) {
@@ -27,23 +37,31 @@ export default function MyPeaksPage({ user, authLoading }) {
   const [listVersion, setListVersion] = useState(0);
   // Text typed in the search box
   const [query, setQuery] = useState("");
+  // true while the "Add climb" window is open
+  const [isAddingClimb, setIsAddingClimb] = useState(false);
 
   // The climb being edited / waiting for delete confirmation (null = none)
   const [climbToEdit, setClimbToEdit] = useState(null);
   const [climbToDelete, setClimbToDelete] = useState(null);
   const [actionError, setActionError] = useState("");
-  // true while the "Add climb" window is open
-  const [isAddingClimb, setIsAddingClimb] = useState(false);
 
-  // Only the climbs that match the search
-  const visibleClimbs = useMemo(
+  // The list goes through three steps: search, then filters, then sorting
+  const searched = useMemo(
     () => climbs.filter((climb) => climbMatchesQuery(climb, query)),
     [climbs, query]
   );
+  const filters = useFilters(CLIMB_FILTERS, searched);
+  const {
+    sort,
+    sortedItems: visibleClimbs,
+    select: selectSort,
+  } = useSort(CLIMB_SORTS, filters.filteredItems, INITIAL_SORT);
 
-  // The numbers follow the search. To always show the whole diary instead,
-  // use `climbs` here in place of `visibleClimbs`.
-  const stats = useMemo(() => getDiaryStats(visibleClimbs), [visibleClimbs]);
+  // The numbers follow search and filters (the order does not change them)
+  const stats = useMemo(
+    () => getDiaryStats(filters.filteredItems),
+    [filters.filteredItems]
+  );
 
   async function handleConfirmDelete() {
     setActionError("");
@@ -105,16 +123,21 @@ export default function MyPeaksPage({ user, authLoading }) {
 
         {climbs.length > 0 && (
           <>
-            <div className="my-peaks__search">
+            {/* Search box + filters + sort, on one row */}
+            <div className="my-peaks__toolbar">
               <SearchField
                 value={query}
                 onChange={setQuery}
                 placeholder="Search your climbs by peak name..."
               />
+              <FilterButton filters={filters} />
+              <SortButton options={CLIMB_SORTS} sort={sort} onSelect={selectSort} />
             </div>
 
+            <ActiveFilters filters={filters} />
+
             {visibleClimbs.length === 0 ? (
-              <p className="my-peaks__message">No climbs match "{query.trim()}".</p>
+              <p className="my-peaks__message">No climbs match your search or filters.</p>
             ) : (
               <>
                 <div className="my-peaks__stats">
@@ -123,12 +146,16 @@ export default function MyPeaksPage({ user, authLoading }) {
                     <span>Climbs</span>
                   </div>
                   <div>
+                    <strong>{stats.totalSummits}</strong>
+                    <span>Summits</span>
+                  </div>
+                  <div>
                     <strong>{stats.distinctPeaks}</strong>
                     <span>Peaks</span>
                   </div>
                   <div>
-                    <strong>{stats.totalSummits}</strong>
-                    <span>Total summits</span>
+                    <strong>{stats.highest} m</strong>
+                    <span>Highest</span>
                   </div>
                   <div>
                     <strong>{formatDistance(stats.distanceM)}</strong>
@@ -137,10 +164,6 @@ export default function MyPeaksPage({ user, authLoading }) {
                   <div>
                     <strong>{stats.gainM} m</strong>
                     <span>Elevation gain</span>
-                  </div>
-                  <div>
-                    <strong>{stats.highest} m</strong>
-                    <span>Highest peak</span>
                   </div>
                 </div>
 
@@ -160,6 +183,16 @@ export default function MyPeaksPage({ user, authLoading }) {
           </>
         )}
       </div>
+
+      {isAddingClimb && (
+        <ClimbFormModal
+          user={user}
+          allPeaks={allPeaks}
+          // No initialPeak: the peaks list starts empty and you pick them in the form
+          onSaved={reload}
+          onClose={() => setIsAddingClimb(false)}
+        />
+      )}
 
       {climbToEdit && (
         <ClimbFormModal
@@ -181,16 +214,6 @@ export default function MyPeaksPage({ user, authLoading }) {
           confirmLabel="Delete"
           onConfirm={handleConfirmDelete}
           onCancel={() => setClimbToDelete(null)}
-        />
-      )}
-
-      {isAddingClimb && (
-        <ClimbFormModal
-          user={user}
-          allPeaks={allPeaks}
-          // No initialPeak: the peaks list starts empty and you pick them in the form
-          onSaved={reload}
-          onClose={() => setIsAddingClimb(false)}
         />
       )}
     </main>

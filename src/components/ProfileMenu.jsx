@@ -43,6 +43,11 @@ export default function ProfileMenu({ user }) {
     navigate("/my-peaks");
   }
 
+  function handleFavouritesClick() {
+    setIsMenuOpen(false);
+    navigate("/favourites");
+  }
+
   return (
     // Reference box: the menu is positioned relative to this wrapper
     <div style={{ position: "relative" }}>
@@ -82,7 +87,7 @@ export default function ProfileMenu({ user }) {
               borderBottom: "1px solid var(--md-theme-outline-variant)",
             }}
           >
-            <MenuItem label="Favourites" icon={Heart} onClick={() => { }} />
+            <MenuItem label="Favourites" icon={Heart} onClick={handleFavouritesClick} />
             <MenuItem label="My peaks" icon={MountainSnow} onClick={handleMyPeaksClick} />
             <MenuItem label="Settings" icon={Settings} onClick={() => { }} />
             <MenuItem label="Log out" icon={LogOut} onClick={handleLogoutClick} />
