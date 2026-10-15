@@ -4,7 +4,7 @@
   top: calc(var(--topbar-height, 64px) + 70px);
   left: 12px;
   bottom: 12px;
-  width: 360px;
+  width: 380px;
   max-width: calc(100vw - 24px);
   /* Above Leaflet panes and controls (up to 1000) */
   z-index: 1100;

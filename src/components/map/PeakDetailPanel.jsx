@@ -136,11 +136,12 @@ export default function PeakDetailPanel({
                   title="By time of day"
                   ticks={DAYPART_TICKS}
                   values={stats.byDaypart}
+                  /*
                   note={
                     stats.withoutTime > 0
                       ? `${stats.withoutTime} without a known time, not counted here`
                       : null
-                  }
+                  } */
                 />
               </>
             )}
