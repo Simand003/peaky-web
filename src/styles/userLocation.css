@@ -1,0 +1,41 @@
+/* Button that brings the map back to the user's position.
+   Same size, corners, background and shadow as the zoom buttons. */
+.user-location__button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: var(--md-theme-background);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  /* Grey until the position is known */
+  color: var(--md-theme-on-surface-variant);
+  cursor: pointer;
+}
+
+/* The position is known: the icon takes the color of the site */
+.user-location__button.is-active {
+  color: var(--md-theme-primary);
+}
+
+.user-location__button:hover:not(:disabled) {
+  background: var(--md-theme-secondary-container);
+}
+
+/* While the position is being found */
+.user-location__button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Error message, shown above the button (e.g. when the permission is denied) */
+.user-location__error {
+  max-width: 240px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--md-theme-background);
+  color: var(--md-theme-error);
+  font-size: 13px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}

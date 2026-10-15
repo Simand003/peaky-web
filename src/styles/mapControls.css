@@ -1,0 +1,13 @@
+/* The map buttons stacked in the bottom-right corner, one under the other.
+   bottom: 32px leaves room for the OpenStreetMap credit line, which must stay visible. */
+.map-controls {
+  position: absolute;
+  right: 12px;
+  bottom: 32px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  /* All the buttons end on the same right edge, even if their widths differ */
+  align-items: flex-end;
+  gap: 8px;
+}

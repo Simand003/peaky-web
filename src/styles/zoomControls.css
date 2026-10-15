@@ -1,0 +1,36 @@
+/* Two stacked buttons in the bottom-right corner of the map.
+   bottom: 32px leaves room for the OpenStreetMap credit line, which must stay visible. */
+.zoom-controls {
+  /* position and distance from the corner come from .map-controls */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--md-theme-background);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.zoom-controls button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--md-theme-primary);
+  cursor: pointer;
+}
+
+.zoom-controls button + button {
+  border-top: 1px solid var(--md-theme-outline-variant);
+}
+
+.zoom-controls button:hover:not(:disabled) {
+  background: var(--md-theme-secondary-container);
+}
+
+/* The limit is reached: zooming further is not possible */
+.zoom-controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}

@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
-import { CircleMarker, useMap, useMapEvents } from "react-leaflet";
+import { useMap, useMapEvents } from "react-leaflet";
 import { getMinElevation } from "../../utils/peaks";
+import PeakMarker from "./PeakMarker";
+import ClusterLayer from "./ClusterLayer";
 
+// peaks: all the peaks. filteredIds: ids of the peaks that pass the filters, or null
+// when no filter is active. highlightedIds: a Set of ids (peaks of a climb).
 export default function PeaksLayer({
   peaks,
   selectedId,
@@ -18,33 +22,40 @@ export default function PeaksLayer({
 
   const minElevation = getMinElevation(zoom);
 
-  // The selected peak always stays visible, even if we zoom out below its threshold
-  const visiblePeaks = useMemo(
-    () =>
-      peaks.filter((p) => {
-        // The selected peak and the highlighted ones are always visible
-        if (p.id === selectedId || highlightedIds.has(p.id)) return true;
-        // Filters active: show every peak that passes them, whatever the zoom
-        if (filteredIds) return filteredIds.has(p.id);
-        // No filters: the usual rule, only the higher peaks when zoomed out
-        return p.elevation >= minElevation;
-      }),
-    [peaks, minElevation, selectedId, highlightedIds, filteredIds]
-  );
+  // singles: drawn as dots. clustered: grouped in numbered bubbles.
+  const { singles, clustered } = useMemo(() => {
+    const pinned = []; // the selected peak and the highlighted ones: always alone
+    const rest = []; // the others, if they pass the rules
 
-  return visiblePeaks.map((p) => {
-    const isSelected = p.id === selectedId;
-    const isHighlighted = highlightedIds.has(p.id);
-    return (
-      <CircleMarker
-        key={p.id}
-        center={[p.lat, p.lon]}
-        radius={isSelected ? 9 : isHighlighted ? 7 : 5}
-        pathOptions={{
-          color: isSelected ? "#d32f2f" : isHighlighted ? "#f57c00" : "#3388ff",
-        }}
-        eventHandlers={{ click: () => onSelectPeak(p) }}
-      />
-    );
-  });
+    for (const p of peaks) {
+      if (p.id === selectedId || highlightedIds.has(p.id)) {
+        pinned.push(p);
+      } else if (filteredIds ? filteredIds.has(p.id) : p.elevation >= minElevation) {
+        // Filters active: every peak that passes them, whatever the zoom.
+        // No filters: the usual rule, only the higher peaks when zoomed out.
+        rest.push(p);
+      }
+    }
+
+    // With filters the others are grouped in bubbles, otherwise every peak is a dot
+    return filteredIds
+      ? { singles: pinned, clustered: rest }
+      : { singles: [...pinned, ...rest], clustered: [] };
+  }, [peaks, selectedId, highlightedIds, filteredIds, minElevation]);
+
+  return (
+    <>
+      {filteredIds && <ClusterLayer peaks={clustered} onSelectPeak={onSelectPeak} />}
+
+      {singles.map((p) => (
+        <PeakMarker
+          key={p.id}
+          peak={p}
+          isSelected={p.id === selectedId}
+          isHighlighted={highlightedIds.has(p.id)}
+          onSelect={onSelectPeak}
+        />
+      ))}
+    </>
+  );
 }

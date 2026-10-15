@@ -8,6 +8,7 @@ import PeaksLayer from "../components/map/PeaksLayer";
 import TrackLayer from "../components/map/TrackLayer";
 import ZoomIndicator from "../components/map/ZoomIndicator";
 import PeakDetailPanel from "../components/map/PeakDetailPanel";
+import MapZoomLimits from "../components/map/MapZoomLimits"
 import FlyToPeak from "../components/map/FlyToPeak";
 import SearchBar from "../components/map/SearchBar";
 import ClimbFormModal from "../components/climbs/ClimbFormModal";
@@ -16,8 +17,11 @@ import useFilters from "../hooks/useFilters";
 import useUserClimbs from "../hooks/useUserClimbs";
 import FilterButton from "../components/filters/FilterButton";
 import { MAP_FILTERS } from "../constants/mapFilters";
+import { MAX_BOUNDS, MIN_ZOOM } from "../constants/map";
 import "../styles/mapToolbar.css";
 import UserLocation from "../components/map/UserLocation";
+import ZoomControls from "../components/map/ZoomControls";
+import MapControls from "../components/map/MapControls";
 
 import "../styles/mapNotice.css";
 
@@ -126,6 +130,9 @@ export default function MapPage({ user, authLoading }) {
         center={GRIGNETTA_CENTER}
         zoom={8}
         zoomControl={false}
+        minZoom={MIN_ZOOM}
+        maxBounds={MAX_BOUNDS}
+        maxBoundsViscosity={1.0}
         // Draw all markers on a single <canvas> instead of one SVG element per peak
         preferCanvas
         // flex: 1 = take all the height left under the top bar
@@ -145,8 +152,12 @@ export default function MapPage({ user, authLoading }) {
         />
         {/* A search overrides the target coming from the diary */}
         <FlyToPeak target={searchTarget ?? urlTarget} />
+        <MapZoomLimits />
         <ZoomIndicator />
-        <UserLocation />
+        <MapControls>
+          <UserLocation />
+          <ZoomControls />
+        </MapControls>
       </MapContainer>
 
       {trackError && (
