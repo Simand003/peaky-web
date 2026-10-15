@@ -1,0 +1,45 @@
+/* Bar split in equal parts, with a line under it and between the parts */
+.category-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--md-theme-outline-variant);
+}
+
+.category-tabs__tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 12px;
+  /* The colored line under the selected part is this border */
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--md-theme-on-surface-variant);
+  font-family: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.category-tabs__tab + .category-tabs__tab {
+  border-left: 1px solid var(--md-theme-outline-variant);
+}
+
+.category-tabs__tab:hover {
+  background: var(--md-theme-secondary-container);
+}
+
+.category-tabs__tab.is-selected {
+  border-bottom-color: var(--md-theme-primary);
+  color: var(--md-theme-primary);
+  font-weight: 600;
+}
+
+.category-tabs__count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--md-theme-secondary-container);
+  font-size: 12px;
+  font-weight: 400;
+}

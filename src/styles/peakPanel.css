@@ -152,6 +152,12 @@
   cursor: not-allowed;
 }
 
+/* The peak is in the favourites: highlighted button, filled heart */
+.peak-panel__add-fav.is-active {
+  background: var(--md-theme-secondary-container);
+  color: var(--md-theme-primary);
+}
+
 .peak-panel__add-peak {
   display: flex;
   align-items: center;

@@ -18,7 +18,8 @@ export default function PeakDetailPanel({
   myClimbs,
   myClimbsLoading,
   myClimbsError,
-  onAddFavourite,
+  isFavourite,
+  onToggleFavourite,
   onAddClimb,
   onClose,
 }) {
@@ -64,12 +65,14 @@ export default function PeakDetailPanel({
       <div className="peak-panel__body">
         <section className="peak-panel__button">
           <button
-            className="peak-panel__add-fav"
-            onClick={onAddFavourite}
+            className={`peak-panel__add-fav ${isFavourite ? "is-active" : ""}`}
+            onClick={onToggleFavourite}
             disabled={!user}
+            aria-pressed={isFavourite}
           >
-            <Heart size={18} />
-            Add to favourites
+            {/* fill="currentColor" paints the heart with the color of the text */}
+            <Heart size={18} fill={isFavourite ? "currentColor" : "none"} />
+            {isFavourite ? "In favourites" : "Add to favourites"}
           </button>
           <button
             className="peak-panel__add-peak"
@@ -81,8 +84,8 @@ export default function PeakDetailPanel({
           </button>
         </section>
         {!user && (
-            <p className="peak-panel__hint">Log in to use Add options.</p>
-          )}
+          <p className="peak-panel__hint">Log in to use Add options.</p>
+        )}
         <section>
           <h3>Info</h3>
           {loading && <p className="peak-panel__empty">Loading...</p>}

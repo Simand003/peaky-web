@@ -22,7 +22,7 @@ import "../styles/mapToolbar.css";
 import UserLocation from "../components/map/UserLocation";
 import ZoomControls from "../components/map/ZoomControls";
 import MapControls from "../components/map/MapControls";
-
+import useFavourites from "../hooks/useFavourites";
 import "../styles/mapNotice.css";
 
 const GRIGNETTA_CENTER = [45.92, 9.39];
@@ -117,6 +117,9 @@ export default function MapPage({ user, authLoading }) {
     reload: reloadMyClimbs,
   } = usePeakClimbs(selectedId, user?.uid);
 
+  // ...inside the component, after the other hooks:
+  const { isFavourite, toggle: toggleFavourite } = useFavourites(user?.uid);
+
   function handleSearchSelect(peak) {
     setSelectedId(peak.id);
     // A NEW object each time, so searching the same peak twice still triggers the flight
@@ -178,6 +181,8 @@ export default function MapPage({ user, authLoading }) {
         myClimbsError={myClimbsError}
         onAddClimb={() => setIsAddingClimb(true)}
         onClose={() => setSelectedId(null)}
+        isFavourite={selectedPeak ? isFavourite("peak", selectedPeak.id) : false}
+        onToggleFavourite={() => toggleFavourite("peak", selectedPeak)}
       />
 
       {isAddingClimb && selectedPeak && user && (
