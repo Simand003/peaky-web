@@ -1,0 +1,96 @@
+{
+  "Italia": {
+    "iso": "IT",
+    "regions": {
+      "Abruzzo": "IT-65",
+      "Basilicata": "IT-77",
+      "Calabria": "IT-78",
+      "Campania": "IT-72",
+      "Emilia-Romagna": "IT-45",
+      "Friuli-Venezia Giulia": "IT-36",
+      "Lazio": "IT-62",
+      "Liguria": "IT-42",
+      "Lombardia": "IT-25",
+      "Marche": "IT-57",
+      "Molise": "IT-67",
+      "Piemonte": "IT-21",
+      "Puglia": "IT-75",
+      "Sardegna": "IT-88",
+      "Sicilia": "IT-82",
+      "Toscana": "IT-52",
+      "Trentino-Alto Adige": "IT-32",
+      "Umbria": "IT-55",
+      "Valle d'Aosta": "IT-23",
+      "Veneto": "IT-34"
+    }
+  },
+  "Svizzera": {
+    "iso": "CH",
+    "regions": {
+      "Appenzello Esterno": "CH-AR",
+      "Appenzello Interno": "CH-AI",
+      "Argovia": "CH-AG",
+      "Basilea Campagna": "CH-BL",
+      "Basilea Città": "CH-BS",
+      "Berna": "CH-BE",
+      "Friburgo": "CH-FR",
+      "Ginevra": "CH-GE",
+      "Giura": "CH-JU",
+      "Glarona": "CH-GL",
+      "Grigioni": "CH-GR",
+      "Lucerna": "CH-LU",
+      "Neuchâtel": "CH-NE",
+      "Nidvaldo": "CH-NW",
+      "Obvaldo": "CH-OW",
+      "San Gallo": "CH-SG",
+      "Sciaffusa": "CH-SH",
+      "Soletta": "CH-SO",
+      "Svitto": "CH-SZ",
+      "Ticino": "CH-TI",
+      "Turgovia": "CH-TG",
+      "Uri": "CH-UR",
+      "Vallese": "CH-VS",
+      "Vaud": "CH-VD",
+      "Zugo": "CH-ZG",
+      "Zurigo": "CH-ZH"
+    }
+  },
+  "Austria": {
+    "iso": "AT",
+    "regions": {
+      "Alta Austria": "AT-4",
+      "Bassa Austria": "AT-3",
+      "Burgenland": "AT-1",
+      "Carinzia": "AT-2",
+      "Salisburgo": "AT-5",
+      "Stiria": "AT-6",
+      "Tirolo": "AT-7",
+      "Vienna": "AT-9",
+      "Vorarlberg": "AT-8"
+    }
+  },
+  "Slovenia": {
+    "iso": "SI",
+    "regions": {
+      "Slovenia": "SI"
+    }
+  },
+  "Francia": {
+    "iso": "FR",
+    "regions": {
+      "Alvernia-Rodano-Alpi": "FR-ARA",
+      "Borgogna-Franca Contea": "FR-BFC",
+      "Bretagna": "FR-BRE",
+      "Centro-Valle della Loira": "FR-CVL",
+      "Corsica": "FR-20R",
+      "Grand Est": "FR-GES",
+      "Alta Francia": "FR-HDF",
+      "Île-de-France": "FR-IDF",
+      "Normandia": "FR-NOR",
+      "Nuova Aquitania": "FR-NAQ",
+      "Occitania": "FR-OCC",
+      "Paesi della Loira": "FR-PDL",
+      "Provenza-Alpi-Costa Azzurra": "FR-PAC"
+    }
+  }
+}
