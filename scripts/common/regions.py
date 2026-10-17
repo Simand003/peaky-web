@@ -1,7 +1,8 @@
 import json
 import os
+from typing import NamedTuple
 
-from common.status import get_region_status
+from common.catalog import load_manifest
 
 # countries.json lives in scripts/data/. We build the path from this file's
 # location, so the scripts work no matter which folder you launch them from.
@@ -10,6 +11,14 @@ DATA_PATH = os.path.join(
     "data",
     "countries.json",
 )
+
+
+class Region(NamedTuple):
+    """A region chosen from the menu."""
+    country: str        # e.g. "Italia"
+    country_code: str   # e.g. "IT"
+    name: str           # e.g. "Lombardia"
+    code: str           # ISO 3166 code, e.g. "IT-25": identity of the region and name of its file
 
 
 def load_countries():
@@ -38,60 +47,50 @@ def choose_from_list(title, options, labels=None):
         print(f"Inserisci un numero da 1 a {len(options)}.")
 
 
-def format_count(count):
-    """Show a count as a number, '-' for zero and '?' if unknown."""
-    if count is None:
+def count_peaks_by_region():
+    """Return {region code: number of peaks in the catalog}, or None if the manifest is unreadable."""
+    try:
+        manifest = load_manifest()
+    except ValueError:
+        print("Attenzione: manifest.json non è un JSON valido, non posso contare le cime.")
+        return None
+
+    return {entry["code"]: entry["count"] for entry in manifest["regions"]}
+
+
+def format_count(counts, code):
+    """Show the number of peaks of a region: '-' if none, '?' if unknown."""
+    if counts is None:
         return "?"
-    return str(count) if count > 0 else "-"
+    return str(counts.get(code, 0)) if counts.get(code, 0) > 0 else "-"
 
 
-def build_region_labels(db, country_name, region_names):
-    """Build the menu lines for the regions, with their Firestore and JSON counts."""
-    print("\nControllo le cime già presenti...")
-    status, without_region = get_region_status(db, country_name, region_names)
-
-    name_width = max(len(name) for name in region_names)
-    labels = []
-    for name in region_names:
-        firestore_count, json_count = status[name]
-        labels.append(
-            f"{name.ljust(name_width)}   "
-            f"Firestore: {format_count(firestore_count):>6}   "
-            f"JSON: {format_count(json_count):>6}"
-        )
-
-    # Legend and a note about old entries that cannot be assigned to a region
-    legend = "(Firestore = cime nel database, JSON = cime in peaks.json, - = nessuna)"
-    if without_region:
-        legend += (
-            f"\nNota: cime in peaks.json senza regione (non contate): {without_region}. "
-            "Riesporta le regioni per aggiornarle."
-        )
-    return labels, legend
-
-
-def choose_region(db=None):
+def choose_region():
     """Ask for a country and a region.
 
-    If db (the Firestore client) is given, each region is shown with the number
-    of peaks it has on Firestore and in peaks.json.
-
-    Returns (country_name, region_name, iso_code), where iso_code is the
-    ISO 3166 code of the chosen region (used to query OpenStreetMap).
+    Each region is shown with the number of peaks it already has in the catalog.
+    Returns a Region.
     """
     countries = load_countries()
 
     country_name = choose_from_list("Seleziona lo stato:", list(countries.keys()))
+    country = countries[country_name]
 
-    regions = countries[country_name]["regions"]
-    region_names = list(regions.keys())
+    regions = country["regions"]  # {region name: ISO code}
+    names = list(regions.keys())
+    counts = count_peaks_by_region()
 
-    labels = None
-    title = f"\nSeleziona la regione in {country_name}:"
-    if db is not None:
-        labels, legend = build_region_labels(db, country_name, region_names)
-        title += f"\n{legend}"
+    # One line per region: name, code and peaks already in the catalog
+    width = max(len(name) for name in names)
+    labels = [
+        f"{name.ljust(width)}   {regions[name]:<7} {format_count(counts, regions[name]):>6}"
+        for name in names
+    ]
 
-    region_name = choose_from_list(title, region_names, labels)
+    title = (
+        f"\nSeleziona la regione in {country_name}:\n"
+        "(ultima colonna = cime già nel catalogo, - = non ancora importata)"
+    )
+    name = choose_from_list(title, names, labels)
 
-    return country_name, region_name, regions[region_name]
+    return Region(country_name, country["iso"], name, regions[name])

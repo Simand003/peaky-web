@@ -1,99 +1,137 @@
 # Script Python di Peaky
 
-Questi script gestiscono le **cime** del sito: le scaricano da OpenStreetMap, le salvano su Firestore e preparano il file `peaks.json` che il sito legge.
-
-## Come funziona, in breve
+Questi script gestiscono il **catalogo delle cime** del sito: scaricano le cime da OpenStreetMap e scrivono i file JSON che il sito legge. Firestore non è coinvolto: contiene solo i dati degli utenti.
 
 ```
-OpenStreetMap  ──add_peak.py──▶  Firestore  ──export_peaks.py──▶  public/peaks.json  ──▶  sito
-                                     ▲                                    ▲
-                                     └──────────delete_peaks.py───────────┘
+OpenStreetMap  ──add_peak.py──▶  public/data/peaks/*.json  ──▶  sito
+                                          ▲
+                                          └── delete_peaks.py
 ```
-
-- **Firestore** (collezione `peaks`) è il database completo delle cime.
-- **`peaks.json`** è una copia leggera, con solo i campi utili alla mappa. Il sito legge questo file invece di interrogare Firestore a ogni visita, così non paga una lettura per ogni cima.
 
 ## Struttura della cartella
 
 ```
 peaky-web/
   public/
-    peaks.json               <- generato da export_peaks.py, letto dal sito
+    data/
+      peaks/
+        manifest.json        <- indice di tutte le regioni (piccolo, il sito lo legge sempre)
+        IT-25.json           <- le cime di una regione (il nome del file è il codice della regione)
+        CH-TI.json
+        ...
   scripts/
     README.md
     requirements.txt
-    serviceAccountKey.json   <- chiave privata di Firebase (NON va su Git)
-    add_peak.py              <- importa le cime di una regione
-    export_peaks.py          <- aggiorna peaks.json dalle cime su Firestore
-    delete_peaks.py          <- elimina in massa le cime di una regione
+    add_peak.py              <- importa o aggiorna le cime di una regione
+    delete_peaks.py          <- elimina una regione dal catalogo
     data/
       countries.json         <- paesi, regioni e codici ISO
-    common/                  <- codice condiviso dai tre script
-      __init__.py
-      firebase.py            <- connessione a Firestore
+    common/                  <- codice condiviso dagli script
+      __init__.py            <- vuoto, dice a Python che common è un pacchetto
+      catalog.py             <- lettura e scrittura dei file di regione e del manifest
+      overpass.py            <- download da OpenStreetMap, con più server e tentativi
       regions.py             <- carica countries.json e mostra i menu
-      status.py              <- conta le cime di ogni regione (Firestore e peaks.json)
-      peaks_file.py          <- lettura e scrittura di peaks.json
 ```
 
 ## Preparazione (una volta sola)
 
-1. Installa Python e le librerie, dalla cartella `scripts`:
-   ```
-   pip install -r requirements.txt
-   ```
-2. Metti `serviceAccountKey.json` nella cartella `scripts`. Si scarica dalla console Firebase (Impostazioni progetto → Account di servizio). Contiene una chiave con pieni poteri sul progetto: aggiungila al `.gitignore` e non condividerla mai.
+Dalla cartella `scripts`:
 
-Gli script vanno lanciati dalla cartella `scripts`:
+```
+pip install -r requirements.txt
+```
+
+Serve solo la libreria `requests`. `serviceAccountKey.json` non serve più a questi script: se non ti serve per altro, puoi revocarla dalla console Firebase (Impostazioni progetto → Account di servizio).
+
+Gli script si lanciano dalla cartella `scripts`:
+
 ```
 python add_peak.py
 ```
 
-## I tre script
+> **Nota di transizione.** Finché il sito non viene aggiornato, legge ancora il vecchio `public/peaks.json`. Non eliminarlo e non aspettarti che le regioni importate con questi script compaiano sulla mappa: il passaggio ai nuovi file è il passo successivo.
 
-Tutti e tre iniziano allo stesso modo: scegli il **paese** e la **regione** da un menu (numero + Invio).
+## Gli script
 
-Nel menu delle regioni, ogni riga mostra quante cime ha quella regione su **Firestore** e quante nel **JSON** (`-` significa nessuna):
+Entrambi iniziano allo stesso modo: scegli il **paese** e la **regione** da un menu (numero + Invio). Ogni riga mostra il codice della regione e quante cime ha già nel catalogo (`-` significa nessuna):
 
 ```
- 9. Lombardia               Firestore:   1234   JSON:   1234
-12. Piemonte                Firestore:      5   JSON:      -
+ 9. Lombardia               IT-25     2400
+10. Marche                  IT-57        -
 ```
 
-Così vedi subito quali regioni sono già importate e quali già esportate. Una regione con cime su Firestore ma non nel JSON ha bisogno dell'export; una con cime nel JSON ma non su Firestore è stata eliminata dal database ma non dal file. Per contare, lo script fa una richiesta di conteggio per regione (il server conta senza scaricare le cime: circa una lettura ogni 1000 cime). Le cime di `peaks.json` esportate prima che esistesse il campo `region` non possono essere assegnate a una regione: il menu te lo segnala, e riesportando la regione vengono aggiornate.
+### `add_peak.py` — importa o aggiorna una regione
 
-### `add_peak.py` — importa le cime
+1. Chiede a Overpass (il servizio di ricerca di OpenStreetMap) le cime (`natural=peak`) che hanno nome e quota, dentro la regione scelta. La regione è cercata tramite il suo **codice ISO**, non tramite il nome.
+2. Scarta le cime con dati non validi (senza nome, coordinate o quota utilizzabile).
+3. Confronta le cime con quelle già nel catalogo e mostra un riepilogo: quante sono **nuove**, **modificate**, **invariate**, e quante **non sono più su OpenStreetMap**.
+4. **Chiede conferma** (`s/n`). Se rispondi `n`, o se non c'è nulla da cambiare, non scrive niente.
+5. Se confermi, scrive il file della regione e aggiorna il manifest.
 
-1. Chiede a Overpass (il servizio di ricerca di OpenStreetMap) tutte le cime (`natural=peak`) dentro la regione scelta. La regione viene cercata tramite il suo **codice ISO**, non tramite il nome.
-2. Scarta le cime con dati incompleti (senza nome, coordinate o quota valida).
-3. Ti mostra quante cime valide ha trovato e la quota minima e massima, e **chiede conferma** (`s/n`) prima di scrivere.
-4. Se confermi, le salva su Firestore a gruppi da 500 (il limite di Firestore) con una barra di avanzamento.
-
-Le cime sono salvate con l'id di OpenStreetMap come id del documento e `merge=True`: rilanciare lo script sulla stessa regione **aggiorna** le cime esistenti, senza duplicarle e senza toccare altri campi aggiunti in seguito.
+Le cime che spariscono da OpenStreetMap **restano** nel catalogo: un id non deve mai sparire, altrimenti le salite del diario che lo usano perderebbero la cima. Reimportare una regione aggiorna e aggiunge, non toglie.
 
 Overpass è un servizio pubblico e a volte è sovraccarico. Lo script prova tre server in sequenza, fino a tre giri, con pause crescenti. Gestisce anche il caso in cui un server risponde "ok" ma con un messaggio di errore e nessun dato.
 
-### `export_peaks.py` — aggiorna `peaks.json`
+### `delete_peaks.py` — elimina una regione dal catalogo
 
-1. Legge da Firestore **solo** le cime della regione scelta (il filtro lo applica Firestore, quindi paghi solo quelle letture).
-2. Per ogni cima tiene `id`, `name`, `lat`, `lon`, `elevation`, `country` e `region`. Le coordinate sono arrotondate a 5 decimali (circa 1 metro).
-3. **Unisce** le cime al `peaks.json` esistente, usando l'`id`: una cima già presente viene aggiornata, una nuova viene aggiunta, tutte le altre restano intatte.
-4. Riscrive il file ordinato dalla cima più alta alla più bassa, una cima per riga.
+1. Scegli la regione: lo script mostra quante cime ha nel catalogo.
+2. Per procedere devi scrivere `ELIMINA`. Qualsiasi altra risposta annulla tutto.
+3. Toglie la regione dal manifest e poi elimina il suo file.
 
-Per questo puoi esportare una regione alla volta e il file le accumula. Se una regione non ha cime su Firestore, lo script si ferma senza toccare il file.
+> **Attenzione:** le salite del diario (collezione `climbs`) si riferiscono alle cime tramite il loro id. Eliminare una cima già scalata da qualcuno lascia quella salita senza coordinate. Il file eliminato si può recuperare solo da Git o reimportando la regione.
 
-### `delete_peaks.py` — elimina in massa
+## Il catalogo
 
-1. Scegli da dove eliminare: **Firestore e peaks.json**, **solo Firestore** o **solo peaks.json**.
-2. Lo script conta le cime trovate e mostra il riepilogo, senza eliminare nulla.
-3. Per procedere devi scrivere `ELIMINA`. Qualsiasi altra risposta annulla tutto.
-4. Elimina prima da Firestore (a gruppi da 500) e poi dal file. Se Firestore va in errore, `peaks.json` resta intatto.
+### File di una regione (`IT-25.json`)
 
-> **Attenzione:** l'eliminazione da Firestore non si può annullare. Inoltre le salite del diario (collezione `climbs`) si riferiscono alle cime tramite il loro id: eliminare una cima già scalata da qualcuno lascia quella salita senza cima.
+Un elenco di cime, una per riga, ordinato dalla più alta alla più bassa:
+
+```json
+[
+{"id":"10017564820","name":"Piz de l'Avartel SO","lat":46.24928,"lon":9.28145,"elevation":2130},
+...
+]
+```
+
+- `id` è l'id del nodo OpenStreetMap, come stringa. È l'identità della cima in tutto il sito e **non deve mai cambiare**.
+- `lat` e `lon` hanno 5 decimali (circa 1 metro).
+- Regione e paese **non** sono nelle cime: li dice il manifest. Il sito li aggiunge in memoria quando carica i file.
+
+### Manifest (`manifest.json`)
+
+```json
+{
+  "regions": [
+    {
+      "code": "IT-25",
+      "countryCode": "IT",
+      "country": "Italia",
+      "region": "Lombardia",
+      "file": "IT-25.json",
+      "version": "a447abaf",
+      "count": 2400,
+      "bytes": 280000,
+      "bbox": [45.5, 8.5, 46.6, 10.7],
+      "maxElevation": 3905
+    }
+  ]
+}
+```
+
+- `version` è un codice calcolato dal contenuto del file. Il sito scarica `IT-25.json?v=a447abaf`: se il file cambia cambia anche la versione e nessuno vede dati vecchi; se non cambia, il browser usa la copia che ha già.
+- `bbox` è il riquadro geografico `[sud, ovest, nord, est]`. Serve, più avanti, a caricare solo le regioni visibili sulla mappa.
+- Il manifest è ordinato per codice, così in Git cambiano solo le righe che cambiano davvero.
+
+### Regole del catalogo
+
+- Il **codice ISO** identifica la regione; i nomi servono solo da mostrare.
+- Una cima sul confine può comparire in due regioni: il sito scarta i doppioni per id.
+- I file sono scritti in un solo passaggio (prima un file temporaneo, poi la sostituzione), e se il manifest è rovinato gli script si fermano **prima** di scrivere o eliminare qualsiasi cosa.
+- In futuro i rifugi avranno una cartella propria (`public/data/huts/`) con un manifest proprio, perché hanno campi diversi dalle cime.
 
 ## Il file dei paesi: `data/countries.json`
 
-È l'unica fonte di verità per i menu: tutti e tre gli script lo leggono.
+È l'unica fonte per i menu e per i codici.
 
 ```json
 {
@@ -107,7 +145,7 @@ Per questo puoi esportare una regione alla volta e il file le accumula. Se una r
 }
 ```
 
-Ogni regione ha un nome (mostrato nel menu e salvato su Firestore) e un codice ISO 3166-2 (usato per cercare l'area su OpenStreetMap). Il campo `iso` del paese per ora è solo informativo: gli script non lo usano.
+Il codice del paese (`iso`) va nel manifest; il codice di ogni regione dà il nome al file e viene usato per cercare l'area su OpenStreetMap.
 
 ### Aggiungere un paese o una regione
 
@@ -115,55 +153,29 @@ Ogni regione ha un nome (mostrato nel menu e salvato su Firestore) e un codice I
 2. Trova il codice ISO di ogni regione su Wikipedia, alla pagina "ISO 3166-2:XX" (con XX il codice del paese), oppure nel tag `ISO3166-2` della relazione su openstreetmap.org.
 3. Non serve toccare gli script.
 
-Se un paese non ha regioni con un codice ISO (come la Slovenia, che ha solo comuni), puoi usare come unica "regione" l'intero paese con il codice del paese **senza trattino** (per esempio `SI`). Lo script lo riconosce dall'assenza del trattino e lo cerca come paese intero.
+Se un paese non ha regioni con un codice ISO (come la Slovenia, che ha solo comuni), usa come unica "regione" l'intero paese con il codice del paese **senza trattino** (per esempio `SI`). Lo script lo riconosce dall'assenza del trattino e lo cerca come paese intero.
 
-Il nome di una regione, una volta usato per importare cime, finisce nei documenti su Firestore (campi `country` e `region`). Se lo cambi nel file, le cime già importate non combaceranno più con il nuovo nome.
-
-## Dati salvati
-
-**Documento su Firestore** (`peaks/{id OSM}`):
-
-| Campo | Esempio |
-|---|---|
-| `name` | `"Piz de l'Avartel SO"` |
-| `elevation` | `2130` (metri, intero) |
-| `lat`, `lon` | `46.2492812`, `9.2814517` |
-| `country` | `"Italia"` |
-| `region` | `"Lombardia"` |
-| `source` | `"OSM"` |
-| `osm_id` | `10017564820` |
-
-**Voce di `peaks.json`** (una per riga):
-
-```json
-{"id":"10017564820","name":"Piz de l'Avartel SO","lat":46.24928,"lon":9.28145,"elevation":2130,"country":"Italia","region":"Lombardia"}
-```
+Il nome della regione finisce nel manifest e quindi nei filtri del sito. Cambiarlo in `countries.json` e reimportare la regione basta ad aggiornarlo ovunque.
 
 ## Flusso tipico
 
 **Aggiungere una regione nuova**
 1. `python add_peak.py` → scegli la regione, controlla il riepilogo, conferma.
-2. `python export_peaks.py` → scegli la stessa regione.
-3. Ricarica il sito: la regione compare con le sue cime.
+2. Pubblica il sito con i nuovi file in `public/data/peaks/`.
 
 **Aggiornare una regione già importata**
-Ripeti i due passaggi: le cime esistenti vengono aggiornate, quelle nuove aggiunte.
+Stessi passaggi: le cime esistenti vengono aggiornate, quelle nuove aggiunte, quelle sparite da OpenStreetMap restano.
 
 **Togliere una regione**
-`python delete_peaks.py` → scegli la regione e da dove eliminare.
+`python delete_peaks.py` → scegli la regione e conferma con `ELIMINA`.
 
 ## Problemi comuni
 
 | Messaggio | Cosa significa |
 |---|---|
-| `ModuleNotFoundError: No module named 'common...'` | Un file della cartella `common` manca o ha un nome diverso. Controlla che ci siano `__init__.py`, `firebase.py`, `regions.py` e `peaks_file.py`, e che lanci lo script dalla cartella `scripts`. |
-| `AttributeError: ... has no attribute 'count'` (nel menu delle regioni) | La libreria Firebase è troppo vecchia per il conteggio. Aggiornala con `pip install -U firebase-admin`. |
-| `Errore HTTP: 502 / 504 / 500` | Il server Overpass è sovraccarico. Lo script ritenta da solo; se fallisce tutto, riprova più tardi. |
+| `ModuleNotFoundError: No module named 'common...'` | Un file della cartella `common` manca o ha un nome diverso. Controlla che ci siano `__init__.py`, `catalog.py`, `overpass.py` e `regions.py`, e che lanci lo script dalla cartella `scripts`. |
+| `Errore HTTP: 502 / 504 / 500` | Il server Overpass è sovraccarico. Lo script ritenta da solo; se falliscono tutti i tentativi, riprova più tardi. |
 | `Il server ha segnalato un problema: ...` | Il server ha risposto ma non ha completato la ricerca (di solito per timeout). Stesso rimedio: riprova più tardi. |
-| `Nessuna cima trovata: controlla il codice ...` | Overpass ha risposto bene ma non ha trovato l'area: il codice ISO in `countries.json` è probabilmente sbagliato. |
-| `Nessuna cima trovata per ...` (in export) | Quella regione non ha cime su Firestore: importala prima con `add_peak.py`. |
-| Errore leggendo `peaks.json` | Il file non è un JSON valido. Gli script si fermano **prima** di scrivere, quindi non lo danneggiano: sistemalo a mano o eliminalo e riesporta le regioni. |
-
-## Costi su Firestore
-
-Il piano gratuito di Firebase ha quote giornaliere di letture, scritture ed eliminazioni (controlla i valori attuali nella console Firebase). Ogni cima importata è una scrittura, ogni cima esportata una lettura, ogni cima eliminata una eliminazione. Importare paesi interi con migliaia di cime consuma una parte importante della quota: per questo `add_peak.py` chiede conferma mostrando il numero esatto prima di scrivere.
+| `Nessuna cima trovata: controlla il codice ...` | Overpass ha risposto bene ma non ha trovato l'area o nessuna cima: il codice ISO in `countries.json` è probabilmente sbagliato. |
+| `manifest.json non è un JSON valido` | Il file è rovinato. Gli script si fermano senza toccare nulla: ripristinalo da Git, oppure eliminalo e reimporta le regioni. |
+| `Il catalogo è già aggiornato` | La regione non ha cime nuove o modificate rispetto a OpenStreetMap: non c'è nulla da salvare. |
