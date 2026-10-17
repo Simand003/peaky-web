@@ -1,4 +1,4 @@
-import "../styles/categoryTabs.css";
+import "../../styles/categoryTabs.css";
 
 // A bar split into equal parts, one per category, each with an icon and a label.
 // categories: see PLACE_CATEGORIES. value: key of the selected category.

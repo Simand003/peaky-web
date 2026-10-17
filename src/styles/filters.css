@@ -416,3 +416,16 @@
   font-size: 13px;
   opacity: 0.8;
 }
+
+.location-editor__regions {
+  margin-top: 12px;
+  padding-left: 12px;
+  border-left: 2px solid var(--md-theme-outline-variant);
+}
+
+.location-editor__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--md-theme-on-surface-variant);
+}

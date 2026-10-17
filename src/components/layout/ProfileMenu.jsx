@@ -1,11 +1,11 @@
 import { useState } from "react";
 import ProfileButton from "./ProfileButton";
-import MenuItem from "./MenuItem";
-import ConfirmDialog from "./ConfirmDialog";
-import { logout } from "../services/authService";
+import MenuItem from "../ui/MenuItem";
+import ConfirmDialog from "../ui/ConfirmDialog";
+import { logout } from "../../services/authService";
 import { useNavigate } from "react-router-dom";
 import { Settings, LogOut, MountainSnow, Heart } from "lucide-react";
-import useUserProfile from "../hooks/useUserProfile";
+import useUserProfile from "../../hooks/useUserProfile";
 
 // Profile area of the top bar: the round button, the dropdown menu under it,
 // and the confirmation window for logging out.

@@ -50,6 +50,23 @@
         10.81632
       ],
       "maxElevation": 3971
+    },
+    {
+      "code": "IT-65",
+      "countryCode": "IT",
+      "country": "Italia",
+      "region": "Abruzzo",
+      "file": "IT-65.json",
+      "version": "9397a13d",
+      "count": 1084,
+      "bytes": 100343,
+      "bbox": [
+        41.6889,
+        13.08445,
+        42.85802,
+        14.72717
+      ],
+      "maxElevation": 2912
     }
   ]
 }

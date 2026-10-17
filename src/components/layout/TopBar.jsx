@@ -1,5 +1,5 @@
 import ProfileMenu from "./ProfileMenu";
-import "../styles/topBar.css";
+import "../../styles/topBar.css";
 import { Link } from "react-router-dom";
 
 // Top bar of the site: app name on the left, login button on the right

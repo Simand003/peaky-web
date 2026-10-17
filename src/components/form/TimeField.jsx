@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Clock, X } from "lucide-react";
-import "../styles/timeField.css";
+import "../../styles/timeField.css";
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 // Steps of 5 minutes are enough for a hiking diary

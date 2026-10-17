@@ -2,6 +2,7 @@ import ChoiceEditor from "./ChoiceEditor";
 import DateRangeEditor from "./DateRangeEditor";
 import OptionsEditor from "./OptionsEditor";
 import RangeEditor from "./RangeEditor";
+import LocationEditor from "./LocationEditor";
 
 // Which editor to use for each kind of filter. New kinds are added here.
 const EDITORS = {
@@ -9,6 +10,8 @@ const EDITORS = {
   choice: ChoiceEditor,
   dateRange: DateRangeEditor,
   options: OptionsEditor,
+  options: OptionsEditor,
+  location: LocationEditor,
 };
 
 // The popup with one section per filter. align: which edge of the button it sticks to.

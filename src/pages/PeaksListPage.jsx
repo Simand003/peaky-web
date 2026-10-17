@@ -8,7 +8,7 @@ import ActiveFilters from "../components/filters/ActiveFilters";
 import { PEAKS_LIST_FILTERS } from "../constants/peaksListFilters";
 import { getPeakSummaries, climbMatchesQuery } from "../utils/climbs";
 import { formatDistance } from "../utils/gpx";
-import SearchField from "../components/SearchField";
+import SearchField from "../components/form/SearchField";
 import "../styles/myPeaksPage.css";
 import "../styles/peaksListPage.css";
 

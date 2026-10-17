@@ -1,4 +1,4 @@
-import { choiceFilter, optionsFilter, rangeFilter } from "../utils/filters";
+import { choiceFilter, locationFilter, rangeFilter } from "../utils/filters";
 
 // Filters of the map. Each item is a peak from peaks.json.
 // The context is { loggedIn, climbedIds }, built by MapPage.
@@ -22,14 +22,5 @@ export const MAP_FILTERS = [
     test: (peak, value, context) =>
       context.climbedIds.has(peak.id) === (value === "climbed"),
   }),
-  optionsFilter({
-    key: "region",
-    label: "Region",
-    get: (peak) => peak.region,
-  }),
-  optionsFilter({
-    key: "country",
-    label: "Country",
-    get: (peak) => peak.country,
-  }),
+    locationFilter({ key: "location", label: "Location" }),
 ];

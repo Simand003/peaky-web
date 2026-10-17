@@ -1,5 +1,5 @@
 import { Search, X } from "lucide-react";
-import "../styles/searchField.css";
+import "../../styles/searchField.css";
 
 // Text box with a magnifier icon and a button that clears the text.
 // value / onChange(newText): the parent owns the text.

@@ -1,5 +1,5 @@
 import "leaflet/dist/leaflet.css";
-import TopBar from "./components/TopBar";
+import TopBar from "./components/layout/TopBar";
 import AuthModal from "./components/auth/AuthModal";
 import { useState } from "react"
 import useAuth from "./hooks/useAuth";

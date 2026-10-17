@@ -2,9 +2,9 @@ import { useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { Calendar, ChevronDown } from "lucide-react";
 import "react-day-picker/style.css";
-import "../styles/dateField.css";
+import "../../styles/dateField.css";
 import FormField from "./FormField";
-import { formatDate } from "../utils/date";
+import { formatDate } from "../../utils/date";
 
 const months = [
   "Gennaio", "Febbraio", "Marzo", "Aprile",

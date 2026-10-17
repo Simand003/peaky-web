@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Heart, Mountain } from "lucide-react";
-import CategoryTabs from "../components/CategoryTabs";
+import CategoryTabs from "../components/layout/CategoryTabs";
 import useFavourites from "../hooks/useFavourites";
 import usePeaks from "../hooks/usePeaks";
 import { PLACE_CATEGORIES } from "../constants/categories";

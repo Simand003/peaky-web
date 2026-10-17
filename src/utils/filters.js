@@ -92,3 +92,28 @@ export function optionsFilter({ key, label, get }) {
         : `${value[0]}, ${value[1]} +${value.length - 2}`,
   };
 }
+
+// Country + regions filter. value: { [country]: [chosen regions] }.
+// A country with an empty list means the whole country.
+export function locationFilter({ key, label }) {
+  return {
+    key,
+    label,
+    kind: "location",
+    isActive: (value) => value != null && Object.keys(value).length > 0,
+    test: (item, value) => {
+      const regions = value[item.country];
+      if (!regions) return false; // country not chosen
+      return regions.length === 0 || regions.includes(item.region);
+    },
+    describe: (value) => {
+      // A whole country shows its name, otherwise the names of the regions
+      const parts = Object.entries(value).flatMap(([country, regions]) =>
+        regions.length === 0 ? [country] : regions
+      );
+      return parts.length <= 2
+        ? parts.join(", ")
+        : `${parts[0]}, ${parts[1]} +${parts.length - 2}`;
+    },
+  };
+}

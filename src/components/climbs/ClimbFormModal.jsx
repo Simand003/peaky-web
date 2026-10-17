@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import Modal from "../Modal";
-import DateField from "../DateField";
-import TimeField from "../TimeField";
-import FormField from "../FormField";
+import Modal from "../ui/Modal";
+import DateField from "../form/DateField";
+import TimeField from "../form/TimeField";
+import FormField from "../form/FormField";
 import PeakPicker from "./PeakPicker";
 import { addClimb, updateClimb } from "../../services/climbsService";
 import { combineDateAndTime, formatTime } from "../../utils/date";

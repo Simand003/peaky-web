@@ -1,8 +1,8 @@
 import { useState } from "react";
-import FormField from "../FormField";
-import ChipSelect from "../ChipSelect";
-import DateField from "../DateField";
-import InfoButton from "../InfoButton";
+import FormField from "../form/FormField";
+import ChipSelect from "../form/ChipSelect";
+import DateField from "../form/DateField";
+import InfoButton from "../ui/InfoButton";
 import { validateRequired, validateBirthDate } from "../../utils/validation";
 import { formatDate } from "../../utils/date";
 import {

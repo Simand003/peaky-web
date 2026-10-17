@@ -1,7 +1,7 @@
 // Reusable field, one folder up (components/)
 import { useState } from "react";
-import FormField from "../FormField";
-import PasswordField from "../PasswordField";
+import FormField from "../form/FormField";
+import PasswordField from "../form/PasswordField";
 import {
     validateEmail,
     validatePassword,
@@ -10,7 +10,7 @@ import {
 import { registerWithEmail, registerWithGoogle } from "../../services/authService";
 import { getAuthErrorMessage } from "../../utils/authErrors";
 import GoogleLogo from "../icons/GoogleLogo";
-import LinkButton from "../LinkButton";
+import LinkButton from "../ui/LinkButton";
 
 // First sign-up screen: email and password, or Google.
 // onSuccess: called with the new Firebase user once the account is created.
@@ -87,7 +87,7 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }) {
             />
 
             {/* Two columns of equal width: password and confirmation side by side */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 16 }}>
                 <PasswordField
                     label="Password"
                     type="password"

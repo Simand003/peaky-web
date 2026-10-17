@@ -1,7 +1,7 @@
 import { useState } from "react";
-import FormField from "../FormField";
-import PasswordField from "../PasswordField";
-import LinkButton from "../LinkButton";
+import FormField from "../form/FormField";
+import PasswordField from "../form/PasswordField";
+import LinkButton from "../ui/LinkButton";
 import GoogleLogo from "../icons/GoogleLogo";
 import { validateEmail, validateRequired } from "../../utils/validation";
 import { loginWithEmail, loginWithGoogle } from "../../services/authService";
