@@ -1,5 +1,4 @@
 import { Mountain, X, Plus, Heart } from "lucide-react";
-import usePeakDetails from "../../hooks/usePeakDetails";
 import "../../styles/peakPanel.css";
 import { useMemo } from "react";
 import MiniBarChart from "./MiniBarChart";
@@ -24,11 +23,8 @@ export default function PeakDetailPanel({
   onClose,
 }) {
 
-  // Hooks must run before any early return, so this comes first.
-  // peak?.id is undefined when nothing is selected.
-  const { details, loading, error } = usePeakDetails(peak?.id);
-
   // Your ascents of this peak, and the numbers for the charts
+  // (hooks must run before any early return; peak?.id is undefined when nothing is selected)
   const stats = useMemo(() => {
     const ascents = getPeakAscents(myClimbs, peak?.id);
     return {
@@ -42,6 +38,12 @@ export default function PeakDetailPanel({
   }, [myClimbs, peak?.id]);
 
   if (!peak) return null;
+
+  // Region and country come with the peak itself (see fetchPeaks).
+  // A country without regions (like Slovenia) has the same name in both.
+  const place = [peak.region !== peak.country ? peak.region : null, peak.country]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <aside className="peak-panel">
@@ -88,26 +90,19 @@ export default function PeakDetailPanel({
         )}
         <section>
           <h3>Info</h3>
-          {loading && <p className="peak-panel__empty">Loading...</p>}
-          {error && <p className="peak-panel__error">Cannot load details: {error}</p>}
-          {details && (
-            <>
-              <p>
-                {details.region}, {details.country}
-              </p>
-              <div className="peak-panel__stats">
-                <div>
-                  {/* ?? 0 : counters do not exist until the first climb is logged */}
-                  <strong>{details.total_climbs ?? 0}</strong>
-                  <span>Climbs</span>
-                </div>
-                <div>
-                  <strong>{details.total_climbers ?? 0}</strong>
-                  <span>Climbers</span>
-                </div>
-              </div>
-            </>
-          )}
+          {place && <p>{place}</p>}
+          <div className="peak-panel__stats">
+            <div>
+              {/* TODO: the counters will come from the peak statistics, calculated
+                  from the climbs. Until then they are always 0. */}
+              <strong>{peak.total_climbs ?? 0}</strong>
+              <span>Climbs</span>
+            </div>
+            <div>
+              <strong>{peak.total_climbers ?? 0}</strong>
+              <span>Climbers</span>
+            </div>
+          </div>
         </section>
 
         {user && (

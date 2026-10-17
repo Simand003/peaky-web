@@ -1,0 +1,55 @@
+{
+  "regions": [
+    {
+      "code": "IT-21",
+      "countryCode": "IT",
+      "country": "Italia",
+      "region": "Piemonte",
+      "file": "IT-21.json",
+      "version": "1e8cab05",
+      "count": 3131,
+      "bytes": 286550,
+      "bbox": [
+        44.06043,
+        6.63001,
+        46.45859,
+        9.20825
+      ],
+      "maxElevation": 4554
+    },
+    {
+      "code": "IT-23",
+      "countryCode": "IT",
+      "country": "Italia",
+      "region": "Valle d'Aosta",
+      "file": "IT-23.json",
+      "version": "77321f71",
+      "count": 985,
+      "bytes": 91340,
+      "bbox": [
+        45.46695,
+        6.80257,
+        45.98659,
+        7.9374
+      ],
+      "maxElevation": 4807
+    },
+    {
+      "code": "IT-25",
+      "countryCode": "IT",
+      "country": "Italia",
+      "region": "Lombardia",
+      "file": "IT-25.json",
+      "version": "9348ced0",
+      "count": 3442,
+      "bytes": 313449,
+      "bbox": [
+        44.68654,
+        8.57303,
+        46.61589,
+        10.81632
+      ],
+      "maxElevation": 3971
+    }
+  ]
+}
